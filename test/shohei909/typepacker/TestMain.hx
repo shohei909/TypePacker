@@ -12,11 +12,11 @@ import shohei909.typepacker.cases.TypePackerTestCase;
  */
 class TestMain
 {
-	static function main() 
-	{
-		var runner = new NanoTestRunner();
-		runner.add(new TypePackerTestCase());
-		runner.add(new JsonPackerTestCase());
-		runner.run();
-	}
+    static function main() 
+    {
+        var runner = new NanoTestRunner();
+        runner.add(new TypePackerTestCase());
+        runner.add(new JsonPackerTestCase());
+        runner.run();
+    }
 }
