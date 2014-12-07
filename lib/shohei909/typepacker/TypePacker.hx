@@ -1,16 +1,18 @@
 package shohei909.typepacker;
 
 import haxe.crypto.Base64;
+import haxe.Resource;
+import haxe.Unserializer;
 import haxe.io.Bytes;
+#if macro
+import haxe.Serializer;
 import haxe.macro.Compiler;
 import haxe.macro.TypeTools;
-import haxe.Resource;
-import haxe.Serializer;
-import haxe.Unserializer;
 import haxe.macro.ComplexTypeTools;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Type in MacroType;
+#end
 
 class TypePacker
 {
