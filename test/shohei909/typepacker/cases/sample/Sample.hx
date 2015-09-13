@@ -8,7 +8,7 @@ class SampleClass
     @:packed public var e:SampleEnum;
     @:packed public var i:Int;
     @:packed public var str:String;
-    
+
     public function new() {
         i = 50;
         str = "hoge";
@@ -18,13 +18,13 @@ class SampleClass
 enum SampleEnum {
     LINK(e:SampleEnum, c:SampleClass);
     NONE;
-    
-    @:nonPacked NON_PACKED;
-    @:nonPacked NON_PACKED_F(i:Int);
+
+    @:nonpacked NON_PACKED;
+    @:nonpacked NON_PACKED_F(i:Int);
 }
 
 typedef SampleStruct = {
-    @:nonPacked
+    @:nonpacked
     public var c : SamplePrivateClass;
     public var e : SampleEnum;
     public var i : SampleEnum;
@@ -34,7 +34,7 @@ abstract SampleAbstract(SampleEnum) {
     public function new(e) {
         this = e;
     }
-    
+
     public function name() {
         return this.getName();
     }

@@ -1,4 +1,4 @@
-package shohei909.typepacker;
+package shohei909.typepacker.core;
 
 enum PortableTypeInfomation<T>
 {

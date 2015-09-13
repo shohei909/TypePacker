@@ -1,7 +1,8 @@
 package shohei909.typepacker.cases;
 import nanotest.NanoTestCase;
 import shohei909.typepacker.cases.sample.Sample.SampleClass;
-import shohei909.typepacker.PortableTypeInfomation;
+import shohei909.typepacker.core.PackerTools;
+import shohei909.typepacker.core.PortableTypeInfomation;
 
 /**
  * ...
@@ -9,9 +10,12 @@ import shohei909.typepacker.PortableTypeInfomation;
  */
 class TypePackerTestCase extends BaseTestCase
 {
-    public function new() { super(); }
+    public function new() {
+        super();
+    }
+
     public function testBasic() {
-        switch (TypePacker.toTypeInfomation(SampleClass)) {
+        switch (PackerTools.toTypeInfomation(SampleClass)) {
             case PortableTypeInfomation.CLASS("shohei909.typepacker.cases.sample.SampleClass", types):
                 assertMapEquals(
                     [
@@ -25,8 +29,8 @@ class TypePackerTestCase extends BaseTestCase
             default:
                 fail("must be CLASS");
         };
-        
-        switch (TypePacker.resolveType("shohei909.typepacker.cases.sample._Sample.SamplePrivateClass")) {
+
+        switch (PackerTools.resolveType("shohei909.typepacker.cases.sample._Sample.SamplePrivateClass")) {
             case PortableTypeInfomation.CLASS("shohei909.typepacker.cases.sample._Sample.SamplePrivateClass", types):
                 assertMapEquals(
                     [
@@ -44,11 +48,11 @@ class TypePackerTestCase extends BaseTestCase
             default:
                 fail("must be CLASS");
         };
-        
-        switch (TypePacker.resolveType("shohei909.typepacker.cases.sample.SampleEnum")) {
+
+        switch (PackerTools.resolveType("shohei909.typepacker.cases.sample.SampleEnum")) {
             case PortableTypeInfomation.ENUM("shohei909.typepacker.cases.sample.SampleEnum", constructors):
                 assertArrayEquals(
-                    constructors["LINK"], 
+                    constructors["LINK"],
                     [
                         "shohei909.typepacker.cases.sample.SampleEnum",
                         "shohei909.typepacker.cases.sample.SampleClass",
@@ -57,7 +61,7 @@ class TypePackerTestCase extends BaseTestCase
                 assertArrayEquals(constructors["NONE"], []);
                 assertFalse(constructors.exists("NON_PACKED"));
                 assertFalse(constructors.exists("NON_PACKED_F"));
-                
+
             default:
                 fail("must be ENUM");
         };
