@@ -1,15 +1,17 @@
 #1. compile
--main shohei909.typepacker.TestMain
+-main TestMain
 -js bin/test.js
 -lib nanotest
+-lib yaml
 -cp lib
 -cp test
 -debug
- 
+
+
 #2. exec
 --next
 -cmd node "bin/test.js" 1>bin/report_js.txt
- 
+
 #3. read
 --next
 -lib nanotest

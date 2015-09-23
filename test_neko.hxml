@@ -1,15 +1,16 @@
 #1. compile
--main shohei909.typepacker.TestMain
+-main TestMain
 -neko bin/test.n
 -lib nanotest
+-lib yaml
 -cp lib
 -cp test
 -debug
- 
+
 #2. execute
 --next
 -cmd neko "bin/test.n" 1>bin/report_neko.txt
- 
+
 #3. read
 --next
 -lib nanotest

@@ -1,15 +1,16 @@
 #1. compile
--main shohei909.typepacker.TestMain
+-main TestMain
 -java bin/java
 -lib nanotest
+-lib yaml
 -cp lib
 -cp test
 -debug
- 
+
 #2. exec
 --next
 -cmd java -jar ""bin/java/TestMain-Debug.jar"" 1>bin/report_java.txt
- 
+
 #3. read
 --next
 -lib nanotest
