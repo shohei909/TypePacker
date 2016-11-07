@@ -137,7 +137,7 @@ class TypePacker
                     var arr = [];
                     if (c.meta.has(":noPack")) continue;
                     switch(c.type) {
-                        case TEnum(_, []):
+                        case TEnum(_, _):
                         case TFun(args, _):
                             for (a in args) {
                                 var t = a.t;
