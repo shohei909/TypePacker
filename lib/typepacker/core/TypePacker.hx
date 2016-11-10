@@ -80,17 +80,33 @@ class TypePacker
                 Context.addResource(resourceName, Bytes.ofString(Serializer.run(registered)));
             });
         }
-
+        
+        return _registerType(type, new Map());
+    }
+    
+    private static function _registerType(type:MacroType, paramsMap:Map<String, MacroType>) {
+        var tmpName = getTypeName(type);
+        type = if (paramsMap.exists(tmpName))
+        {
+            paramsMap[tmpName];
+        }
+        else
+        {
+            TypeTools.map(type, applyTypeParams.bind(paramsMap));
+        }
+        
         var name = getTypeName(type);
-
+        if (paramsMap.exists(name)) {
+            return getTypeName(paramsMap[name]);
+        }
         if (registered.exists(name)) {
             return name;
         }
-
-        registered[name] = null;
+        
         var t = type, prevT = null;
         var nullable = false;
-
+        registered[name] = null;
+        
         do {
             if (isNullType(t)) {
                 nullable = true;
@@ -98,22 +114,22 @@ class TypePacker
             prevT = t;
             t = Context.follow(t, true);
         } while (getTypeName(prevT) != getTypeName(t));
-
+        
         var info = switch (t) {
             case TInst(_.toString() => "Array", [element]):
-                TypeInfomation.COLLECTION(registerType(element), ARRAY);
+                TypeInfomation.COLLECTION(_registerType(element, paramsMap), ARRAY);
 
             case TInst(_.toString() => "List", [element]):
-                TypeInfomation.COLLECTION(registerType(element), LIST);
+                TypeInfomation.COLLECTION(_registerType(element, paramsMap), LIST);
 
             case TAbstract(_.toString() => "haxe.ds.Vector", [element]):
-                TypeInfomation.COLLECTION(registerType(element), VECTOR);
+                TypeInfomation.COLLECTION(_registerType(element, paramsMap), VECTOR);
 
             case TAbstract(_.toString() => "Map", [TInst(_.toString() => "String", []), element]):
-                TypeInfomation.MAP(STRING, registerType(element));
+                TypeInfomation.MAP(STRING, _registerType(element, paramsMap));
 
             case TAbstract(_.toString() => "Map", [TAbstract(_.toString() => "Int", []), element]):
-                TypeInfomation.MAP(INT, registerType(element));
+                TypeInfomation.MAP(INT, _registerType(element, paramsMap));
 
             case TInst(_.toString() => "String", []) :
                 TypeInfomation.STRING;
@@ -128,9 +144,10 @@ class TypePacker
                 TypeInfomation.PRIMITIVE(nullable, INT);
 
             case TEnum(ref, params):
+                
                 var e = ref.get();
                 var map = new Map<String, Array<String>>();
-                var paramMap = mapTypeParams(e.params, params);
+                var childParamsMap = mapTypeParams(e.params, params);
 
                 for (key in e.constructs.keys()) {
                     var c = e.constructs.get(key);
@@ -141,28 +158,24 @@ class TypePacker
                         case TFun(args, _):
                             for (a in args) {
                                 var t = a.t;
-                                if (paramMap.exists(getTypeName(t))) {
-                                    t = paramMap[getTypeName(t)];
-                                }
-                                arr.push(registerType(t));
+                                arr.push(_registerType(t, childParamsMap));
                             };
                         default :
                             Context.error(name + " has unsupported constractor", Context.currentPos());
                     }
                     map[key] = arr;
                 }
-
                 TypeInfomation.ENUM(ref.toString(), map);
 
             case TInst(ref, params) :
                 var struct = ref.get();
                 var className = struct.name;
                 var map = new Map();
-                var paramMap = null;
+                var childParamsMap = null;
 
                 while (true) {
-                    paramMap = mapTypeParams(struct.params, params, paramMap);
-                    mapFields(struct.fields.get(), paramMap, map);
+                    childParamsMap = mapTypeParams(struct.params, params, childParamsMap);
+                    mapFields(struct.fields.get(), childParamsMap, map);
 
                     var superClass = struct.superClass;
                     if (superClass == null) break;
@@ -171,7 +184,7 @@ class TypePacker
 
                     for (p in superClass.params) {
                         var name = p.getName();
-                        params.push(if (paramMap.exists(name)) paramMap[name] else p);
+                        params.push(if (childParamsMap.exists(name)) childParamsMap[name] else p);
                     }
                 }
 
@@ -185,23 +198,31 @@ class TypePacker
 
             case TAbstract(ref, params) :
                 var abst = ref.get();
-                var paramMap = mapTypeParams(abst.params, params);
+                var childParamsMap = mapTypeParams(abst.params, params);
                 var type = abst.type;
 
-                if (paramMap.exists(getTypeName(type))) {
-                    type = paramMap[getTypeName(type)];
-                }
-
-                TypeInfomation.ABSTRACT(registerType(type));
+                TypeInfomation.ABSTRACT(_registerType(type, childParamsMap));
 
             default :
                 Context.error("unspported data type " + name, Context.currentPos());
                 null;
         };
-
+        
         registered[name] = info;
-
         return name;
+    }
+    
+    private static function applyTypeParams(params:Map<String, MacroType>, type:MacroType):MacroType
+    {
+        var name = getTypeName(type);
+        return if (params.exists(name))
+        {
+            params[name];
+        }
+        else
+        {
+            type;
+        }
     }
 
     private static function mapTypeParams(def:Array<TypeParameter>, actual:Array<MacroType>, prevMap:Map<String, MacroType> = null) {
@@ -219,7 +240,10 @@ class TypePacker
 
     private static function mapFields(fields:Array<ClassField>, typeParams:Map<String, MacroType> = null, map:Map<String, String> = null) {
         if (map == null) map = new Map();
-
+        if (typeParams == null)
+        {
+            typeParams = new Map();
+        }
         for (f in fields) {
             if (f.meta.has(":noPack")) continue;
 
@@ -230,12 +254,8 @@ class TypePacker
             }
 
             var type = f.type;
-
-            if (typeParams != null && typeParams.exists(getTypeName(type))) {
-                type = typeParams[getTypeName(type)];
-            }
-
-            map[f.name] = registerType(type);
+            
+            map[f.name] = _registerType(type, typeParams);
         }
 
         return map;
