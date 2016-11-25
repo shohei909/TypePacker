@@ -18,7 +18,7 @@ class DataConcreter {
     public function concrete<T>(typeInfo:TypeInfomation<T>, data:Dynamic):T {
         return switch(typeInfo) {
             case TypeInfomation.PRIMITIVE(nullable, type) :
-                if (nullable && (data == null)) {
+                if ((setting.forceNullable || nullable) && (data == null)) {
                     null;
                 } else {
                     constructPrimitive(type, data);

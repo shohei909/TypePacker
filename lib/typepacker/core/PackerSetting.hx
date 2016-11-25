@@ -3,6 +3,7 @@ import haxe.Constraints.Function;
 import haxe.ds.Vector;
 
 class PackerSetting {
-    public function new () { }
-
+	public var forceNullable = false;
+    public function new () {}
 }
+
