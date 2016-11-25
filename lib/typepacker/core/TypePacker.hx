@@ -125,10 +125,10 @@ class TypePacker
             case TAbstract(_.toString() => "haxe.ds.Vector", [element]):
                 TypeInfomation.COLLECTION(_registerType(element, paramsMap), VECTOR);
 
-            case TAbstract(_.toString() => "Map", [TInst(_.toString() => "String", []), element]):
+            case TAbstract(_.toString() => "Map", [TypeTools.followWithAbstracts(_) => (TInst(_.toString() => "String", [])), element]):
                 TypeInfomation.MAP(STRING, _registerType(element, paramsMap));
 
-            case TAbstract(_.toString() => "Map", [TAbstract(_.toString() => "Int", []), element]):
+            case TAbstract(_.toString() => "Map", [TypeTools.followWithAbstracts(_) => (TAbstract(_.toString() => "Int", [])), element]):
                 TypeInfomation.MAP(INT, _registerType(element, paramsMap));
 
             case TInst(_.toString() => "String", []) :
@@ -169,6 +169,11 @@ class TypePacker
 
             case TInst(ref, params) :
                 var struct = ref.get();
+                if (struct.isInterface)
+                {
+                    Context.error("interface is not supported:" + name, Context.currentPos());
+                }
+                
                 var className = struct.name;
                 var map = new Map();
                 var childParamsMap = null;
