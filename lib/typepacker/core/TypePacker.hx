@@ -161,7 +161,7 @@ class TypePacker
                                 arr.push(_registerType(t, childParamsMap));
                             };
                         default :
-                            Context.error(name + " has unsupported constractor", Context.currentPos());
+                            Context.error(name + " has unsupported constractor: " + c.type, Context.currentPos());
                     }
                     map[key] = arr;
                 }
