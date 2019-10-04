@@ -1,11 +1,13 @@
 package typepacker.core;
 
-import haxe.ds.Map;
-import haxe.io.Bytes;
-import haxe.macro.Printer;
 
 #if macro
-import haxe.Serializer;
+import haxe.EnumTools.EnumValueTools;
+import haxe.ds.IntMap;
+import haxe.ds.Map;
+import haxe.ds.StringMap;
+import haxe.io.Bytes;
+import haxe.macro.Printer;
 import haxe.macro.Compiler;
 import haxe.macro.Context;
 import haxe.macro.Expr;
@@ -16,14 +18,10 @@ import haxe.macro.TypeTools;
 import haxe.macro.ComplexTypeTools;
 #else
 import haxe.Resource;
-import haxe.Unserializer;
 #end
 
 class TypePacker
 {
-    private static var resourceName:String = Type.getClassName(TypePacker) + ".registered";
-    private static var registered:Map<String, Dynamic> = null;
-
     #if !macro
     macro
     #end
@@ -33,12 +31,10 @@ class TypePacker
 
     #if !macro
     public static function resolveType<T>(name:String):TypeInfomation<T> {
-        if (registered == null) {
-            registered = Unserializer.run(Resource.getString(resourceName));
-        }
-        return registered[name];
+        return TypePackerResource.registered[name];
     }
     #else
+    public static var registered:Map<String, Dynamic> = new Map();
 
     public static function complexTypeToTypeInfomation(complexType:ComplexType):Expr {
         var pos = Context.currentPos();
@@ -75,12 +71,7 @@ class TypePacker
     }
 
     public static function registerType(type:MacroType) {
-        if (registered == null) {
-            registered = new Map();
-            Context.onGenerate(function (array:Array<MacroType>) {
-                Context.addResource(resourceName, Bytes.ofString(Serializer.run(registered)));
-            });
-        }
+        
         
         return _registerType(type, new Map());
     }
@@ -151,7 +142,10 @@ class TypePacker
 
             case TAbstract(_.toString() => "Int", []) :
                 TypeInfomation.PRIMITIVE(nullable, INT);
-
+				
+			case TAbstract(ref, [element]) if (ref.toString() == "Class"):
+				TypeInfomation.CLASS_TYPE;
+				
             case TEnum(ref, params):
                 
                 var e = ref.get();
@@ -279,6 +273,58 @@ class TypePacker
 			fieldNames.push(f.name);
         }
     }
-
+	
+	private static var defined:Bool = false;
+	private static function onAfterTyping(types:Array<haxe.macro.Type.ModuleType>):Void
+	{
+		if (defined) return;
+		defined = true;
+		// see https://github.com/HaxeFoundation/haxe/issues/6254#issuecomment-502017733
+		var expr = makeExpr(registered);
+		var type = macro class TypePackerResource2 {
+			@:keep public static var registered:Map<String, Dynamic> = $expr;
+		};
+		type.meta.push({name:"@:keep", pos:Context.currentPos()});
+		Context.defineType(type);
+		Compiler.exclude("TypePackerResource");
+	}
+	
+	private static function makeExpr(value:Dynamic):Expr
+	{
+		return if (Std.is(value, IntMap) || Std.is(value, StringMap))
+		{
+			var mapExpr:Array<Expr> = [];
+			for (key in (value.keys(): Iterator<Int>))
+			{
+				mapExpr.push(macro $v{key} => ${makeExpr(value.get(key))});
+			}
+			if (mapExpr.length == 0) macro new Map() else macro $a{mapExpr};
+		}
+		else if (Reflect.isEnumValue(value))
+		{
+			var typeName = Type.getEnumName(Type.getEnum(value)).split(".");
+			var name = EnumValueTools.getName(value);
+			var params = EnumValueTools.getParameters(value);
+			if (params.length == 0)
+			{
+				macro $p{typeName}.$name;
+			}
+			else
+			{
+				var paramExprs = [for (param in params) makeExpr(param)];
+				macro $p{typeName}.$name($a{paramExprs});
+			}
+		}
+		else
+		{
+			Context.makeExpr(value, Context.currentPos());
+		}
+	}
     #end
+	
+	public macro static function build():Array<Field>
+	{
+		Context.onAfterTyping(onAfterTyping);
+		return null;
+	}
 }

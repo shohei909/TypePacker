@@ -33,6 +33,14 @@ class DataSimplifier {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
                 }
+			case TypeInfomation.CLASS_TYPE:
+                if (data == null) {
+                    null;
+                } else if (Std.is(data, Class)) {
+                    (Type.getClassName((data:Dynamic)) : Dynamic);
+                } else {
+                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
+                }
             case TypeInfomation.ENUM(_, constractors, _):
                 (simplifyEnum(constractors, data) : Dynamic);
             case TypeInfomation.CLASS(_, fields, _) | ANONYMOUS(fields, _) :

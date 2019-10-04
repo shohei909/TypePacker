@@ -11,21 +11,22 @@ enum TypeInfomation<T>
     COLLECTION(elementType:String, type:CollectionType);
     PRIMITIVE(nullable:Bool, type:PrimitiveType);
     STRING;
+	CLASS_TYPE;
 }
 
-enum MapKeyType {
-    STRING;
-    INT;
+@:enum abstract MapKeyType(Int) from Int {
+    var STRING = 0;
+    var INT = 1;
 }
 
-enum PrimitiveType {
-    INT;
-    BOOL;
-    FLOAT;
+@:enum abstract PrimitiveType(Int) from Int {
+    var INT = 0;
+    var BOOL = 1;
+    var FLOAT = 2;
 }
 
-enum CollectionType {
-    ARRAY;
-    LIST;
-    VECTOR;
+@:enum abstract CollectionType(Int) from Int {
+    var ARRAY = 0;
+    var LIST = 1;
+    var VECTOR = 2;
 }
