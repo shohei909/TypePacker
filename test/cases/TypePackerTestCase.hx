@@ -51,7 +51,12 @@ class TypePackerTestCase extends BaseTestCase
             default:
                 fail("must be CLASS");
         };
-
+        switch (TypePacker.toTypeInfomation("Class<SamplePair>")) {
+            case TypeInfomation.CLASS_TYPE:
+				
+			default:
+                fail("must be CLASS TYPE");
+		}
         switch (TypePacker.resolveType("cases.sample._Sample.SamplePrivateClass")) {
             case TypeInfomation.CLASS("cases.sample._Sample.SamplePrivateClass", types, names):
                 assertMapEquals(
