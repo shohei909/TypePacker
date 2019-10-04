@@ -125,10 +125,10 @@ class TypePacker
             case TAbstract(_.toString() => "haxe.ds.Vector", [element]):
                 TypeInfomation.COLLECTION(_registerType(element, paramsMap), VECTOR);
 
-            case TAbstract(_.toString() => "Map", [TypeTools.followWithAbstracts(_) => (TInst(_.toString() => "String", [])), element]):
+            case TAbstract(_.toString() => #if(haxe_ver < 4) "Map" #else "haxe.ds.Map" #end, [TypeTools.followWithAbstracts(_) => (TInst(_.toString() => "String", [])), element]):
                 TypeInfomation.MAP(STRING, _registerType(element, paramsMap));
 
-            case TAbstract(_.toString() => "Map", [TypeTools.followWithAbstracts(_) => (TAbstract(_.toString() => "Int", [])), element]):
+            case TAbstract(_.toString() => #if(haxe_ver < 4) "Map" #else "haxe.ds.Map" #end, [TypeTools.followWithAbstracts(_) => (TAbstract(_.toString() => "Int", [])), element]):
                 TypeInfomation.MAP(INT, _registerType(element, paramsMap));
 
             case TInst(_.toString() => "String", []) :
