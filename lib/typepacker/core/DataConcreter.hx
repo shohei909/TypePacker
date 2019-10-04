@@ -2,7 +2,7 @@ package typepacker.core;
 import haxe.ds.Vector;
 import typepacker.core.PackerBase;
 import typepacker.core.PackerSetting;
-import typepacker.core.TypeInfomation;
+import typepacker.core.TypeInformation;
 
 /**
  * ...
@@ -15,15 +15,15 @@ class DataConcreter {
         this.setting = setting;
     }
 
-    public function concrete<T>(typeInfo:TypeInfomation<T>, data:Dynamic):T {
+    public function concrete<T>(typeInfo:TypeInformation<T>, data:Dynamic):T {
         return switch(typeInfo) {
-            case TypeInfomation.PRIMITIVE(nullable, type) :
+            case TypeInformation.PRIMITIVE(nullable, type) :
                 if ((setting.forceNullable || nullable) && (data == null)) {
                     null;
                 } else {
                     constructPrimitive(type, data);
                 }
-            case TypeInfomation.STRING :
+            case TypeInformation.STRING :
                 if (data == null) {
                     data;
                 } else if (Std.is(data, String)) {
@@ -31,7 +31,7 @@ class DataConcreter {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
                 }
-			case TypeInfomation.CLASS_TYPE:
+			case TypeInformation.CLASS_TYPE:
                 if (data == null) {
                     null;
                 } else if (Std.is(data, String)) {
@@ -39,23 +39,23 @@ class DataConcreter {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
                 }
-            case TypeInfomation.ENUM(name, constractors, _):
+            case TypeInformation.ENUM(name, constractors, _):
                 (concreteEnum(name, constractors, data) : Dynamic);
-            case TypeInfomation.CLASS(name, fields, _) :
+            case TypeInformation.CLASS(name, fields, _) :
                 (concreteClass(name, fields, data) : Dynamic);
             case ANONYMOUS(fields, _) :
                 (concreteAnonymous(fields, data) : Dynamic);
-            case TypeInfomation.MAP(INT, value) :
+            case TypeInformation.MAP(INT, value) :
                 (concreteIntMap(value, data) : Dynamic);
-            case TypeInfomation.MAP(STRING, value) :
+            case TypeInformation.MAP(STRING, value) :
                 (concreteStringMap(value, data) : Dynamic);
-            case TypeInfomation.COLLECTION(element, ARRAY) :
+            case TypeInformation.COLLECTION(element, ARRAY) :
                 (concreteArray(element, data) : Dynamic);
-            case TypeInfomation.COLLECTION(element, VECTOR) :
+            case TypeInformation.COLLECTION(element, VECTOR) :
                 (concreteVector(element, data) : Dynamic);
-            case TypeInfomation.COLLECTION(element, LIST) :
+            case TypeInformation.COLLECTION(element, LIST) :
                 (concreteList(element, data) : Dynamic);
-            case TypeInfomation.ABSTRACT(type) :
+            case TypeInformation.ABSTRACT(type) :
                 (concreteAbstract(type, data) : Dynamic);
         }
     }

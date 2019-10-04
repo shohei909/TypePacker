@@ -1,7 +1,7 @@
 package typepacker.core;
 import haxe.ds.Vector;
 
-enum TypeInfomation<T>
+enum TypeInformation<T>
 {
     ANONYMOUS(fieldTypes:Map<String,String>, fieldNames:Array<String>);
     CLASS(type:String, fieldTypes:Map<String,String>, fieldNames:Array<String>);

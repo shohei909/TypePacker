@@ -23,12 +23,12 @@ class Json {
     #end
 
     macro public static function print(type:String, data:Expr) {
-        var info = TypePacker.toTypeInfomation(type);
+        var info = TypePacker.toTypeInformation(type);
         return macro typepacker.json.Json.defaultPacker.printWithInfo($info, $data);
     }
 
     macro public static function parse(type:String, data:Expr) {
-        var info = TypePacker.toTypeInfomation(type);
+        var info = TypePacker.toTypeInformation(type);
         return macro typepacker.json.Json.defaultPacker.parseWithInfo($info, $data);
     }
 }

@@ -25,21 +25,21 @@ class TypePacker
     #if !macro
     macro
     #end
-    public static function toTypeInfomation(e:String):Expr {
-        return complexTypeToTypeInfomation(stringToComplexType(e));
+    public static function toTypeInformation(e:String):Expr {
+        return complexTypeToTypeInformation(stringToComplexType(e));
     }
 
     #if !macro
-    public static function resolveType<T>(name:String):TypeInfomation<T> {
+    public static function resolveType<T>(name:String):TypeInformation<T> {
         return TypePackerResource.registered[name];
     }
     #else
     public static var registered:Map<String, Dynamic> = new Map();
 
-    public static function complexTypeToTypeInfomation(complexType:ComplexType):Expr {
+    public static function complexTypeToTypeInformation(complexType:ComplexType):Expr {
         var pos = Context.currentPos();
         var name = registerType(ComplexTypeTools.toType(complexType));
-        var infoType = macro: typepacker.core.TypeInfomation<$complexType>;
+        var infoType = macro: typepacker.core.TypeInformation<$complexType>;
         return macro (typepacker.core.TypePacker.resolveType($v{name}) : $infoType);
     }
 
@@ -117,34 +117,34 @@ class TypePacker
         
         var info = switch (t) {
             case TInst(_.toString() => "Array", [element]):
-                TypeInfomation.COLLECTION(_registerType(element, paramsMap), ARRAY);
+                TypeInformation.COLLECTION(_registerType(element, paramsMap), ARRAY);
 
             case TInst(_.toString() => #if(haxe_ver < 4) "List" #else "haxe.ds.List" #end, [element]):
-                TypeInfomation.COLLECTION(_registerType(element, paramsMap), LIST);
+                TypeInformation.COLLECTION(_registerType(element, paramsMap), LIST);
 
             case TAbstract(_.toString() => "haxe.ds.Vector", [element]):
-                TypeInfomation.COLLECTION(_registerType(element, paramsMap), VECTOR);
+                TypeInformation.COLLECTION(_registerType(element, paramsMap), VECTOR);
 
             case TAbstract(_.toString() => #if(haxe_ver < 4) "Map" #else "haxe.ds.Map" #end, [TypeTools.followWithAbstracts(_) => (TInst(_.toString() => "String", [])), element]):
-                TypeInfomation.MAP(STRING, _registerType(element, paramsMap));
+                TypeInformation.MAP(STRING, _registerType(element, paramsMap));
 
             case TAbstract(_.toString() => #if(haxe_ver < 4) "Map" #else "haxe.ds.Map" #end, [TypeTools.followWithAbstracts(_) => (TAbstract(_.toString() => "Int", [])), element]):
-                TypeInfomation.MAP(INT, _registerType(element, paramsMap));
+                TypeInformation.MAP(INT, _registerType(element, paramsMap));
 
             case TInst(_.toString() => "String", []) :
-                TypeInfomation.STRING;
+                TypeInformation.STRING;
 
             case TAbstract(_.toString() => "Float", []) :
-                TypeInfomation.PRIMITIVE(nullable, FLOAT);
+                TypeInformation.PRIMITIVE(nullable, FLOAT);
 
             case TAbstract(_.toString() => "Bool", []) :
-                TypeInfomation.PRIMITIVE(nullable, BOOL);
+                TypeInformation.PRIMITIVE(nullable, BOOL);
 
             case TAbstract(_.toString() => "Int", []) :
-                TypeInfomation.PRIMITIVE(nullable, INT);
+                TypeInformation.PRIMITIVE(nullable, INT);
 				
 			case TAbstract(ref, [element]) if (ref.toString() == "Class"):
-				TypeInfomation.CLASS_TYPE;
+				TypeInformation.CLASS_TYPE;
 				
             case TEnum(ref, params):
                 
@@ -170,7 +170,7 @@ class TypePacker
                     map[key] = arr;
 					names.push(key);
                 }
-                TypeInfomation.ENUM(ref.toString(), map, names);
+                TypeInformation.ENUM(ref.toString(), map, names);
 
             case TInst(ref, params) :
                 var struct = ref.get();
@@ -201,7 +201,7 @@ class TypePacker
                     }
                 }
 				fieldNames.reverse();
-                TypeInfomation.CLASS(ref.toString(), map, fieldNames);
+                TypeInformation.CLASS(ref.toString(), map, fieldNames);
 
             case TAnonymous(ref):
                 var struct = ref.get();
@@ -209,14 +209,14 @@ class TypePacker
 				var fieldNames = [];
 				mapFields(struct.fields, null, map, fieldNames);
 
-                TypeInfomation.ANONYMOUS(map, fieldNames);
+                TypeInformation.ANONYMOUS(map, fieldNames);
 
             case TAbstract(ref, params) :
                 var abst = ref.get();
                 var childParamsMap = mapTypeParams(abst.params, params);
                 var type = abst.type;
 
-                TypeInfomation.ABSTRACT(_registerType(type, childParamsMap));
+                TypeInformation.ABSTRACT(_registerType(type, childParamsMap));
 
             default :
                 Context.error("unspported data type " + name, Context.currentPos());

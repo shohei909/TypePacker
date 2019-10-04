@@ -25,24 +25,24 @@ class PackerBase {
         this.simplifier = new DataSimplifier(setting);
     }
 
-    public function printWithInfo<T>(info:TypeInfomation<T>, data:T):String {
+    public function printWithInfo<T>(info:TypeInformation<T>, data:T):String {
         return basePrint(simplifier.simplify(info, data));
     }
 
-    public function parseWithInfo<T>(info:TypeInfomation<T>, data:String):T {
+    public function parseWithInfo<T>(info:TypeInformation<T>, data:String):T {
         return concreter.concrete(info, baseParse(data));
     }
     #end
 
     macro public function print(self:Expr, type:String, data:Expr) {
         var complexType = TypePacker.stringToComplexType(type);
-        var info = TypePacker.complexTypeToTypeInfomation(complexType);
+        var info = TypePacker.complexTypeToTypeInformation(complexType);
         return macro $self.printWithInfo($info, ($data : $complexType));
     }
 
 
     macro public function parse(self:Expr, type:String, data:Expr) {
-        var info = TypePacker.toTypeInfomation(type);
+        var info = TypePacker.toTypeInformation(type);
         return macro $self.parseWithInfo($info, $data);
     }
 

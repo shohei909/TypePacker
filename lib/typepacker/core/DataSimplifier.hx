@@ -1,9 +1,9 @@
 package typepacker.core;
 import haxe.ds.Vector;
 import haxe.macro.Expr;
-import typepacker.core.TypeInfomation.CollectionType;
-import typepacker.core.TypeInfomation.MapKeyType;
-import typepacker.core.TypeInfomation.PrimitiveType;
+import typepacker.core.TypeInformation.CollectionType;
+import typepacker.core.TypeInformation.MapKeyType;
+import typepacker.core.TypeInformation.PrimitiveType;
 
 /**
  * ...
@@ -16,16 +16,16 @@ class DataSimplifier {
         this.setting = setting;
     }
 
-    public function simplify<T>(typeInfo:TypeInfomation<T>, data:T) : Dynamic {
+    public function simplify<T>(typeInfo:TypeInformation<T>, data:T) : Dynamic {
         return switch(typeInfo) {
-            case TypeInfomation.PRIMITIVE(nullable, type) :
+            case TypeInformation.PRIMITIVE(nullable, type) :
                 if (nullable && (data == null)) {
                     data;
                 } else {
                     simplifyPrimitive(type, data);
                 }
 
-            case TypeInfomation.STRING :
+            case TypeInformation.STRING :
                 if (data == null) {
                     data;
                 } else if (Std.is(data, String)) {
@@ -33,7 +33,7 @@ class DataSimplifier {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
                 }
-			case TypeInfomation.CLASS_TYPE:
+			case TypeInformation.CLASS_TYPE:
                 if (data == null) {
                     null;
                 } else if (Std.is(data, Class)) {
@@ -41,17 +41,17 @@ class DataSimplifier {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
                 }
-            case TypeInfomation.ENUM(_, constractors, _):
+            case TypeInformation.ENUM(_, constractors, _):
                 (simplifyEnum(constractors, data) : Dynamic);
-            case TypeInfomation.CLASS(_, fields, _) | ANONYMOUS(fields, _) :
+            case TypeInformation.CLASS(_, fields, _) | ANONYMOUS(fields, _) :
                 (simplifyClassInstance(fields, data) : Dynamic);
-            case TypeInfomation.MAP(STRING, value) :
+            case TypeInformation.MAP(STRING, value) :
                 (simplifyStringMap(value, (data:Dynamic)) : Dynamic);
-            case TypeInfomation.MAP(INT, value) :
+            case TypeInformation.MAP(INT, value) :
                 (simplifyIntMap(value, (data:Dynamic)) : Dynamic);
-            case TypeInfomation.COLLECTION(elementType, type) :
+            case TypeInformation.COLLECTION(elementType, type) :
                 (simplifyCollection(elementType, type, data) : Dynamic);
-            case TypeInfomation.ABSTRACT(type) :
+            case TypeInformation.ABSTRACT(type) :
                 (simplifyAbstract(type, data) : Dynamic);
         }
     }
