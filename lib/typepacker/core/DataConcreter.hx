@@ -31,12 +31,11 @@ class DataConcreter {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
                 }
-
-            case TypeInfomation.ENUM(name, constractors):
+            case TypeInfomation.ENUM(name, constractors, _):
                 (concreteEnum(name, constractors, data) : Dynamic);
-            case TypeInfomation.CLASS(name, fields) :
+            case TypeInfomation.CLASS(name, fields, _) :
                 (concreteClass(name, fields, data) : Dynamic);
-            case ANONYMOUS(fields) :
+            case ANONYMOUS(fields, _) :
                 (concreteAnonymous(fields, data) : Dynamic);
             case TypeInfomation.MAP(INT, value) :
                 (concreteIntMap(value, data) : Dynamic);

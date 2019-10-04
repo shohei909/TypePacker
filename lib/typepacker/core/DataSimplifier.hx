@@ -33,9 +33,9 @@ class DataSimplifier {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
                 }
-            case TypeInfomation.ENUM(_, constractors):
+            case TypeInfomation.ENUM(_, constractors, _):
                 (simplifyEnum(constractors, data) : Dynamic);
-            case TypeInfomation.CLASS(_, fields) | ANONYMOUS(fields) :
+            case TypeInfomation.CLASS(_, fields, _) | ANONYMOUS(fields, _) :
                 (simplifyClassInstance(fields, data) : Dynamic);
             case TypeInfomation.MAP(STRING, value) :
                 (simplifyStringMap(value, (data:Dynamic)) : Dynamic);

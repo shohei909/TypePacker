@@ -16,7 +16,7 @@ class TestMain
         runner.add(new JsonPackerTestCase());
 
 #if (js || cpp || flash)
-        runner.add(new cases.YamlPackerTestCase());
+        //runner.add(new cases.YamlPackerTestCase());
 #end
 
         runner.run();

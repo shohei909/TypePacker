@@ -15,7 +15,7 @@ class TypePackerTestCase extends BaseTestCase
 
     public function testBasic() {
         switch (TypePacker.toTypeInfomation("SamplePair")) {
-            case TypeInfomation.CLASS("cases.sample.SampleStringValue", types):
+            case TypeInfomation.CLASS("cases.sample.SampleStringValue", types, names):
                 assertMapEquals(
                     [
                         "key" => "String",
@@ -24,7 +24,10 @@ class TypePackerTestCase extends BaseTestCase
                     ],
                     types
                 );
-
+				assertArrayEquals(
+					["key", "value", "meta"],
+					names
+				);
                 assertNotEquals(null, Type.resolveClass("cases.sample.SampleStringValue"));
 
             default:
@@ -32,7 +35,7 @@ class TypePackerTestCase extends BaseTestCase
         }
 
         switch (TypePacker.toTypeInfomation("SampleClass")) {
-            case TypeInfomation.CLASS("cases.sample.SampleClass", types):
+            case TypeInfomation.CLASS("cases.sample.SampleClass", types, names):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
@@ -44,12 +47,13 @@ class TypePackerTestCase extends BaseTestCase
                     ],
                     types
                 );
+				assertArrayEquals(["c","e","i","str","stringMap","intMap"], names);
             default:
                 fail("must be CLASS");
         };
 
         switch (TypePacker.resolveType("cases.sample._Sample.SamplePrivateClass")) {
-            case TypeInfomation.CLASS("cases.sample._Sample.SamplePrivateClass", types):
+            case TypeInfomation.CLASS("cases.sample._Sample.SamplePrivateClass", types, names):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
@@ -66,12 +70,13 @@ class TypePackerTestCase extends BaseTestCase
                     ],
                     types
                 );
+				assertArrayEquals(["c","e","i","str","stringMap","intMap","c2","abst","f","arr","e2"], names);
             default:
                 fail("must be CLASS");
         };
 
         switch (TypePacker.resolveType("cases.sample.SampleEnum")) {
-            case TypeInfomation.ENUM("cases.sample.SampleEnum", constructors):
+            case TypeInfomation.ENUM("cases.sample.SampleEnum", constructors, names):
                 assertArrayEquals(
                     constructors["LINK"],
                     [
@@ -79,6 +84,7 @@ class TypePackerTestCase extends BaseTestCase
                         "cases.sample.SampleClass",
                     ]
                 );
+				assertArrayEquals(["LINK", "NONE"], names);
                 assertArrayEquals(constructors["NONE"], []);
                 assertFalse(constructors.exists("NON_pack"));
                 assertFalse(constructors.exists("NON_pack_F"));
@@ -88,13 +94,14 @@ class TypePackerTestCase extends BaseTestCase
         };
 
         switch (TypePacker.resolveType("cases.sample.SampleGenericEnum<Null<Int>>")) {
-            case TypeInfomation.ENUM("cases.sample.SampleGenericEnum", constructors):
+            case TypeInfomation.ENUM("cases.sample.SampleGenericEnum", constructors, names):
                 assertArrayEquals(
                     constructors["TEST"],
                     [
                         "Null<Int>",
                     ]
                 );
+				assertArrayEquals(["TEST"], names);
 
             default:
                 fail("must be ENUM");

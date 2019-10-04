@@ -1,5 +1,6 @@
 package typepacker.core;
 
+import haxe.ds.Map;
 import haxe.io.Bytes;
 import haxe.macro.Printer;
 
@@ -155,9 +156,10 @@ class TypePacker
                 
                 var e = ref.get();
                 var map = new Map<String, Array<String>>();
+				var names = [];
                 var childParamsMap = mapTypeParams(e.params, params);
 
-                for (key in e.constructs.keys()) {
+                for (key in e.names) {
                     var c = e.constructs.get(key);
                     var arr = [];
                     if (c.meta.has(":noPack")) continue;
@@ -172,8 +174,9 @@ class TypePacker
                             Context.error(name + " has unsupported constractor: " + c.type, Context.currentPos());
                     }
                     map[key] = arr;
+					names.push(key);
                 }
-                TypeInfomation.ENUM(ref.toString(), map);
+                TypeInfomation.ENUM(ref.toString(), map, names);
 
             case TInst(ref, params) :
                 var struct = ref.get();
@@ -184,11 +187,14 @@ class TypePacker
                 
                 var className = struct.name;
                 var map = new Map();
+				var fieldNames = [];
                 var childParamsMap = null;
 
                 while (true) {
                     childParamsMap = mapTypeParams(struct.params, params, childParamsMap);
-                    mapFields(struct.fields.get(), childParamsMap, map);
+					var classFields = struct.fields.get();
+					classFields.reverse();
+                    mapFields(classFields, childParamsMap, map, fieldNames);
 
                     var superClass = struct.superClass;
                     if (superClass == null) break;
@@ -200,14 +206,16 @@ class TypePacker
                         params.push(if (childParamsMap.exists(name)) childParamsMap[name] else p);
                     }
                 }
-
-                TypeInfomation.CLASS(ref.toString(), map);
+				fieldNames.reverse();
+                TypeInfomation.CLASS(ref.toString(), map, fieldNames);
 
             case TAnonymous(ref):
                 var struct = ref.get();
-                var map = mapFields(struct.fields);
+                var map = new Map();
+				var fieldNames = [];
+				mapFields(struct.fields, null, map, fieldNames);
 
-                TypeInfomation.ANONYMOUS(map);
+                TypeInfomation.ANONYMOUS(map, fieldNames);
 
             case TAbstract(ref, params) :
                 var abst = ref.get();
@@ -251,8 +259,7 @@ class TypePacker
         return map;
     }
 
-    private static function mapFields(fields:Array<ClassField>, typeParams:Map<String, MacroType> = null, map:Map<String, String> = null) {
-        if (map == null) map = new Map();
+    private static function mapFields(fields:Array<ClassField>, typeParams:Map<String, MacroType> = null, map:Map<String, String>, fieldNames:Array<String>) {
         if (typeParams == null)
         {
             typeParams = new Map();
@@ -269,9 +276,8 @@ class TypePacker
             var type = f.type;
             
             map[f.name] = _registerType(type, typeParams);
+			fieldNames.push(f.name);
         }
-
-        return map;
     }
 
     #end

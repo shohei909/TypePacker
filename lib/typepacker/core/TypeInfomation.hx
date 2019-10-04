@@ -3,9 +3,9 @@ import haxe.ds.Vector;
 
 enum TypeInfomation<T>
 {
-    ANONYMOUS(fieldTypes:Map<String,String>);
-    CLASS(type:String, fieldTypes:Map<String,String>);
-    ENUM(type:String, constructors:Map<String, Array<String>>);
+    ANONYMOUS(fieldTypes:Map<String,String>, fieldNames:Array<String>);
+    CLASS(type:String, fieldTypes:Map<String,String>, fieldNames:Array<String>);
+    ENUM(type:String, constructors:Map<String, Array<String>>, constructorNames:Array<String>);
     MAP(keyType:MapKeyType, valueType:String);
     ABSTRACT(baseType:String);
     COLLECTION(elementType:String, type:CollectionType);
