@@ -105,13 +105,21 @@ class TypePacker
         
         var t = type, prevT = null;
         var nullable = false;
-        registered[name] = null;
+		registered[name] = null;
         
         do {
             if (isNullType(t)) {
                 nullable = true;
             }
-            prevT = t;
+			switch (t) 
+			{
+				case TAbstract(_.toString() => "Null", [element]): 
+					t = element;
+					nullable = true;
+				case _:
+			}
+			
+			prevT = t;
             t = Context.follow(t, true);
         } while (getTypeName(prevT) != getTypeName(t));
         
@@ -119,7 +127,7 @@ class TypePacker
             case TInst(_.toString() => "Array", [element]):
                 TypeInfomation.COLLECTION(_registerType(element, paramsMap), ARRAY);
 
-            case TInst(_.toString() => "List", [element]):
+            case TInst(_.toString() => #if(haxe_ver < 4) "List" #else "haxe.ds.List" #end, [element]):
                 TypeInfomation.COLLECTION(_registerType(element, paramsMap), LIST);
 
             case TAbstract(_.toString() => "haxe.ds.Vector", [element]):
