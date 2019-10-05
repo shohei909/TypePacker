@@ -19,7 +19,7 @@ class BytesPacker
 {
     #if !macro
     public var setting(default, null):PackerSetting;
-	public var serializeer(default, null):BytesPrinter;
+	public var serializer(default, null):BytesPrinter;
 	public var unserializer(default, null):BytesParser;
 	
     public function new(?setting:PackerSetting) {
@@ -29,11 +29,11 @@ class BytesPacker
 			setting.useEnumIndex = true;
 		}
         this.setting = setting;
-        this.serializeer = new BytesPrinter(setting);
+        this.serializer = new BytesPrinter(setting);
         this.unserializer = new BytesParser(setting);
     }
     public function serializeWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
-        return serializeer.serializeWithInfo(info, data, output);
+        return serializer.serializeWithInfo(info, data, output);
     }
 
     public function unserializeWithInfo<T>(info:TypeInformation<T>, input:Input):T {
