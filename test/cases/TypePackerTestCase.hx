@@ -2,6 +2,7 @@ package cases;
 import nanotest.NanoTestCase;
 import cases.sample.Sample.SampleClass;
 import cases.sample.Sample.SamplePair;
+import cases.sample.Sample.SampleEnum;
 import typepacker.core.TypeInformation;
 import typepacker.core.TypePacker;
 
@@ -56,6 +57,12 @@ class TypePackerTestCase extends BaseTestCase
 				
 			default:
                 fail("must be CLASS TYPE");
+		}
+        switch (TypePacker.toTypeInformation("Enum<SampleEnum>")) {
+            case TypeInformation.ENUM_TYPE:
+				
+			case type:
+                fail("must be ENUM TYPE:" + type);
 		}
         switch (TypePacker.resolveType("cases.sample._Sample.SamplePrivateClass")) {
             case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names):

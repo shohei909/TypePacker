@@ -32,6 +32,7 @@ class BytesPrinter
             case TypeInformation.COLLECTION(elementType, type)                                   : mode = printCollection(elementType, type, data, output, mode);
             case TypeInformation.ABSTRACT(type)                                                  : mode = printAbstract(type, data, output, mode);
             case TypeInformation.CLASS_TYPE                                                      : mode = printClassType(data, output, mode);
+            case TypeInformation.ENUM_TYPE                                                       : mode = printEnumType(data, output, mode);
         }
 		return mode;
 	}
@@ -261,6 +262,10 @@ class BytesPrinter
 	private static function printClassType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		return printString(Type.getClassName(data), output, mode);
+	}
+	private static function printEnumType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		return printString(Type.getEnumName(data), output, mode);
 	}
 }
 

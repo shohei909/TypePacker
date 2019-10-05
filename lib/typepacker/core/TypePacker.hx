@@ -145,6 +145,8 @@ class TypePacker
 				
 			case TAbstract(ref, [element]) if (ref.toString() == "Class"):
 				TypeInformation.CLASS_TYPE;
+			case TAbstract(ref, [element]) if (ref.toString() == "Enum"):
+				TypeInformation.ENUM_TYPE;
 				
             case TEnum(ref, params):
                 

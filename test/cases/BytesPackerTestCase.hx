@@ -31,7 +31,8 @@ class BytesPackerTestCase extends BaseTestCase
 		assertIo(TypePacker.toTypeInformation("String"), null);
 		assertArrayIo(TypePacker.toTypeInformation("Array<Int>"), [0, 0x7FFFFFFF, 0xFFFFFFFF, -1]);
 		assertArrayIo(TypePacker.toTypeInformation("Array<Null<Int>>"), [0, 21, null, 4]);
-		
+		assertIo(TypePacker.toTypeInformation("Class<SampleClass>"), SampleClass);
+		assertIo(TypePacker.toTypeInformation("Enum<SampleEnum>"), SampleEnum);
 		{
 			#if !static
 			var data1:Array<String> = [""];

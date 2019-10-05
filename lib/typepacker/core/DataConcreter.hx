@@ -39,6 +39,14 @@ class DataConcreter {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
                 }
+			case TypeInformation.ENUM_TYPE:
+                if (data == null) {
+                    null;
+                } else if (Std.is(data, String)) {
+                    (Type.resolveEnum(data) : Dynamic);
+                } else {
+                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be ENUM<T>");
+                }
             case TypeInformation.ENUM(name, _enum, keys, constractors):
                 (concreteEnum(name, _enum, keys, constractors, data) : Dynamic);
             case TypeInformation.CLASS(name, _class, fields, _) :

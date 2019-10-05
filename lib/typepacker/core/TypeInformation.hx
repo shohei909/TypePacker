@@ -12,6 +12,7 @@ enum TypeInformation<T>
     PRIMITIVE(nullable:Bool, type:PrimitiveType);
     STRING;
 	CLASS_TYPE;
+	ENUM_TYPE;
 }
 
 @:enum abstract MapKeyType(Int) from Int {

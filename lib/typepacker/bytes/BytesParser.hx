@@ -23,6 +23,7 @@ class BytesParser
             case TypeInformation.COLLECTION(elementType, type)           : parseCollection(elementType, type, input);
             case TypeInformation.ABSTRACT(type)                          : parseAbstract(type, input);
             case TypeInformation.CLASS_TYPE                              : parseClassType(input);
+            case TypeInformation.ENUM_TYPE                               : parseEnumType(input);
         }
     }
     private static function parsePrimitive(nullable:Bool, type:PrimitiveType, input:Input):Dynamic
@@ -198,5 +199,9 @@ class BytesParser
 	private static function parseClassType(input:Input):Dynamic
 	{
 		return Type.resolveClass(parseString(input));
+	}
+	private static function parseEnumType(input:Input):Dynamic
+	{
+		return Type.resolveEnum(parseString(input));
 	}
 }

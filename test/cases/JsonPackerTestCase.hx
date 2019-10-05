@@ -31,6 +31,7 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals("{\"i\":50}", Json.print("IntData", new SampleClass()));
         assertEquals("[\"NONE\"]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
 		assertEquals("\"cases.sample.SampleClass\"", Json.print("Class<SampleClass>", SampleClass));
+		assertEquals("\"cases.sample.SampleEnum\"", Json.print("Enum<SampleEnum>", SampleEnum));
     }
 
     public function testParse() {
@@ -56,6 +57,7 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals("NONE", abst.name());
 		
     	assertEquals((cases.sample.Sample.SampleClass:Dynamic), Json.parse("Class<SampleClass>", "\"cases.sample.SampleClass\""));
+    	assertEquals((cases.sample.Sample.SampleEnum:Dynamic), Json.parse("Enum<SampleClass>", "\"cases.sample.SampleEnum\""));
     }
 
     public function testPacker() {
