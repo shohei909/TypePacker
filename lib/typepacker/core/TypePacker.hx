@@ -172,7 +172,7 @@ class TypePacker
 					keys[key] = index;
 					index += 1;
                 }
-                TypeInformation.ENUM(ref.toString(), keys, map);
+                TypeInformation.ENUM(ref.toString(), null, keys, map);
 
             case TInst(ref, params) :
                 var struct = ref.get();
@@ -203,7 +203,7 @@ class TypePacker
                     }
                 }
 				fieldNames.reverse();
-                TypeInformation.CLASS(ref.toString(), map, fieldNames);
+                TypeInformation.CLASS(ref.toString(), null, map, fieldNames);
 
             case TAnonymous(ref):
                 var struct = ref.get();
@@ -301,10 +301,11 @@ class TypePacker
 				mapExpr.push(macro $v{key} => ${makeExpr(value.get(key))});
 			}
 			if (mapExpr.length == 0) macro new Map() else macro $a{mapExpr};
-		}
+		} 
 		else if (Reflect.isEnumValue(value))
 		{
-			var typeName = Type.getEnumName(Type.getEnum(value)).split(".");
+			var typeNameString = Type.getEnumName(Type.getEnum(value));
+			var typeName = typeNameString.split(".");
 			var name = EnumValueTools.getName(value);
 			var params = EnumValueTools.getParameters(value);
 			if (params.length == 0)
@@ -314,6 +315,17 @@ class TypePacker
 			else
 			{
 				var paramExprs = [for (param in params) makeExpr(param)];
+				if (typeNameString == "typepacker.core.TypeInformation")
+				{
+					if (name == "CLASS")
+					{
+						paramExprs[1] = macro Type.resolveClass($v{params[0]});
+					}
+					else if (name == "ENUM")
+					{
+						paramExprs[1] = macro Type.resolveEnum($v{params[0]});
+					}
+				}
 				macro $p{typeName}.$name($a{paramExprs});
 			}
 		}

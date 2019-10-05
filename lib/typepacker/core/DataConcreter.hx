@@ -39,10 +39,10 @@ class DataConcreter {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
                 }
-            case TypeInformation.ENUM(name, keys, constractors):
-                (concreteEnum(name, keys, constractors, data) : Dynamic);
-            case TypeInformation.CLASS(name, fields, _) :
-                (concreteClass(name, fields, data) : Dynamic);
+            case TypeInformation.ENUM(name, _enum, keys, constractors):
+                (concreteEnum(name, _enum, keys, constractors, data) : Dynamic);
+            case TypeInformation.CLASS(name, _class, fields, _) :
+                (concreteClass(name, _class, fields, data) : Dynamic);
             case ANONYMOUS(fields, _) :
                 (concreteAnonymous(fields, data) : Dynamic);
             case TypeInformation.MAP(INT, value) :
@@ -116,8 +116,9 @@ class DataConcreter {
         return Lambda.list(concreteArray(elementTypeString, data));
     }
 
-    private function concreteEnum(enumName:String, keys:Map<String, Int>, constractors:Map<Int, Array<String>>, data:Dynamic):EnumValue {
+    private function concreteEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constractors:Map<Int, Array<String>>, data:Dynamic):EnumValue {
         if (data == null) return null;
+		if (_enum == null) _enum = Type.resolveEnum(name);
         if (!Std.is(data, Array)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be array");
         }
@@ -130,19 +131,19 @@ class DataConcreter {
         var c:String = array[0];
         var paramTypes = constractors[keys[c]];
         var params = [];
-        var e = Type.resolveEnum(enumName);
 
         for (i in 0...paramTypes.length) {
             var type = TypePacker.resolveType(paramTypes[i]);
             params.push(concrete(type, array[i + 1]));
         }
 
-        return Type.createEnum(e, c, params);
+        return Type.createEnum(_enum, c, params);
     }
 
-    private function concreteClass(className:String, fields:Map<String,String>, data:Dynamic):Dynamic {
+    private function concreteClass(name:String, _class:Class<Dynamic>, fields:Map<String,String>, data:Dynamic):Dynamic {
         if (data == null) return null;
-        var result = Type.createEmptyInstance(Type.resolveClass(className));
+		if (_class == null) _class = Type.resolveClass(name);
+        var result = Type.createEmptyInstance(_class);
         for (key in fields.keys()) {
             var type = TypePacker.resolveType(fields[key]);
             var f = if (!Reflect.hasField(data, key)) {

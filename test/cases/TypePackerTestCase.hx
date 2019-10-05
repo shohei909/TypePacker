@@ -15,7 +15,7 @@ class TypePackerTestCase extends BaseTestCase
 
     public function testBasic() {
         switch (TypePacker.toTypeInformation("SamplePair")) {
-            case TypeInformation.CLASS("cases.sample.SampleStringValue", types, names):
+            case TypeInformation.CLASS("cases.sample.SampleStringValue", _, types, names):
                 assertMapEquals(
                     [
                         "key" => "String",
@@ -35,7 +35,7 @@ class TypePackerTestCase extends BaseTestCase
         }
 
         switch (TypePacker.toTypeInformation("SampleClass")) {
-            case TypeInformation.CLASS("cases.sample.SampleClass", types, names):
+            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
@@ -58,7 +58,7 @@ class TypePackerTestCase extends BaseTestCase
                 fail("must be CLASS TYPE");
 		}
         switch (TypePacker.resolveType("cases.sample._Sample.SamplePrivateClass")) {
-            case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", types, names):
+            case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
@@ -81,7 +81,7 @@ class TypePackerTestCase extends BaseTestCase
         };
 
         switch (TypePacker.resolveType("cases.sample.SampleEnum")) {
-            case TypeInformation.ENUM("cases.sample.SampleEnum", keys, constructors):
+            case TypeInformation.ENUM("cases.sample.SampleEnum", _, keys, constructors):
                 assertArrayEquals(
                     constructors[keys["LINK"]],
                     [
@@ -100,7 +100,7 @@ class TypePackerTestCase extends BaseTestCase
         };
 
         switch (TypePacker.resolveType("cases.sample.SampleGenericEnum<Null<Int>>")) {
-            case TypeInformation.ENUM("cases.sample.SampleGenericEnum", keys, constructors):
+            case TypeInformation.ENUM("cases.sample.SampleGenericEnum", _, keys, constructors):
                 assertArrayEquals(
                     constructors[keys["TEST"]],
                     [

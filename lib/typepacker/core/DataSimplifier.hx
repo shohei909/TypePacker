@@ -41,9 +41,9 @@ class DataSimplifier {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
                 }
-            case TypeInformation.ENUM(_, keys, constractors):
+            case TypeInformation.ENUM(_, _, keys, constractors):
                 (simplifyEnum(keys, constractors, data) : Dynamic);
-            case TypeInformation.CLASS(_, fields, _) | ANONYMOUS(fields, _) :
+            case TypeInformation.CLASS(_, _, fields, _) | ANONYMOUS(fields, _) :
                 (simplifyClassInstance(fields, data) : Dynamic);
             case TypeInformation.MAP(STRING, value) :
                 (simplifyStringMap(value, (data:Dynamic)) : Dynamic);
