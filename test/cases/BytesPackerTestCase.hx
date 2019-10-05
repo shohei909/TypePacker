@@ -9,8 +9,8 @@ import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
 import typepacker.bytes.BytesPack;
 import typepacker.bytes.BytesPacker;
-import typepacker.bytes.BytesParser;
-import typepacker.bytes.BytesPrinter;
+import typepacker.bytes.BytesUnserialzer;
+import typepacker.bytes.BytesSerializer;
 import typepacker.core.TypeInformation;
 import typepacker.core.TypePacker;
 

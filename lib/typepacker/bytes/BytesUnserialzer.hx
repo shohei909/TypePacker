@@ -10,7 +10,7 @@ import typepacker.core.PackerSetting;
 import typepacker.core.TypeInformation;
 import typepacker.core.TypePacker;
 
-class BytesParser 
+class BytesUnserialzer 
 {
 	var setting:PackerSetting;
 

@@ -1,5 +1,5 @@
 package typepacker.bytes;
-import typepacker.bytes.BytesPrinter;
+import typepacker.bytes.BytesSerializer;
 
 #if macro
 import haxe.macro.ExprTools;
@@ -19,8 +19,8 @@ class BytesPacker
 {
     #if !macro
     public var setting(default, null):PackerSetting;
-	public var serializer(default, null):BytesPrinter;
-	public var unserializer(default, null):BytesParser;
+	public var serializer(default, null):BytesSerializer;
+	public var unserializer(default, null):BytesUnserialzer;
 	
     public function new(?setting:PackerSetting) {
 		if (setting == null)
@@ -29,8 +29,8 @@ class BytesPacker
 			setting.useEnumIndex = true;
 		}
         this.setting = setting;
-        this.serializer = new BytesPrinter(setting);
-        this.unserializer = new BytesParser(setting);
+        this.serializer = new BytesSerializer(setting);
+        this.unserializer = new BytesUnserialzer(setting);
     }
     public function serializeWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
         return serializer.serializeWithInfo(info, data, output);

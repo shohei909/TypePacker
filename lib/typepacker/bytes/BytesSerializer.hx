@@ -5,13 +5,13 @@ import haxe.io.Bytes;
 import haxe.io.BytesBuffer;
 import haxe.io.BytesOutput;
 import haxe.io.Output;
-import typepacker.bytes.BytesPrinter.OutputMode;
+import typepacker.bytes.BytesSerializer.OutputMode;
 import typepacker.core.PackerSetting;
 import typepacker.core.TypeInformation;
 import typepacker.core.TypePacker;
 import yaml.util.IntMap;
 
-class BytesPrinter
+class BytesSerializer
 {
 	var setting:PackerSetting;
 
