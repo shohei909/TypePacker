@@ -4,6 +4,7 @@ import cases.sample.Sample.SampleAbstract;
 import cases.sample.Sample.SampleClass;
 import cases.sample.Sample.SampleEnum;
 import haxe.ds.Vector;
+import typepacker.core.TypePacker;
 import typepacker.json.Json;
 import typepacker.json.JsonPacker;
 

@@ -23,20 +23,100 @@ class BytesPrinter
 	private static function _printBytesWithInfo(info:TypeInformation<Dynamic>, data:Dynamic, output:Output, mode:OutputMode):OutputMode 
 	{
 		switch (info) {
-            case TypeInformation.PRIMITIVE(nullable, type)                                    : printPrimitive(type, data, output);
-            case TypeInformation.STRING                                                       : mode = printString(data, output, mode); 
-            case TypeInformation.ENUM(_, _, constractors)                                     : mode = printEnum(constractors, data, output, mode);
-            case TypeInformation.CLASS(_, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = printClassInstance(fields, fieldNames, data, output, mode);
-            case TypeInformation.MAP(STRING, value)                                           : mode = printStringMap(value, data, output, mode);
-            case TypeInformation.MAP(INT, value)                                              : mode = printIntMap(value, data, output, mode);
-            case TypeInformation.COLLECTION(elementType, type)                                : mode = printCollection(elementType, type, data, output, mode);
-            case TypeInformation.ABSTRACT(type)                                               : mode = printAbstract(type, data, output, mode);
-            case TypeInformation.CLASS_TYPE                                                   : mode = printClassType(data, output, mode);
+            case TypeInformation.PRIMITIVE(nullable, type)                                       : printPrimitive(nullable, type, data, output);
+            case TypeInformation.STRING                                                          : mode = printString(data, output, mode); 
+            case TypeInformation.ENUM(_, _, _, constractors)                                     : mode = printEnum(constractors, data, output, mode);
+            case TypeInformation.CLASS(_, _, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = printClassInstance(fields, fieldNames, data, output, mode);
+            case TypeInformation.MAP(STRING, value)                                              : mode = printStringMap(value, data, output, mode);
+            case TypeInformation.MAP(INT, value)                                                 : mode = printIntMap(value, data, output, mode);
+            case TypeInformation.COLLECTION(elementType, type)                                   : mode = printCollection(elementType, type, data, output, mode);
+            case TypeInformation.ABSTRACT(type)                                                  : mode = printAbstract(type, data, output, mode);
+            case TypeInformation.CLASS_TYPE                                                      : mode = printClassType(data, output, mode);
         }
+		return mode;
+	}
+    private static function printPrimitive(nullable:Bool, type:PrimitiveType, data:Dynamic, output:Output):Void 
+	{
+		if (nullable) {
+			if (data == null) {
+				output.writeByte(0xFF);
+				return;
+			} else {
+				output.writeByte(0);
+			}
+		}
+		
+        switch (type) {
+            case PrimitiveType.INT   : output.writeInt32(data);
+            case PrimitiveType.BOOL  : output.writeByte(if (data) 1 else 0);
+            case PrimitiveType.FLOAT : output.writeDouble(data);
+        }
+    }
+	private static function printString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		switch (mode)
+		{
+			#if flash
+			case OutputMode.Bytes:
+				if (data == null) {
+					output.writeByte(0xFF);
+					return mode;
+				} else {
+					output.writeByte(0);
+				}
+				var string:String = data;
+				var byteArray:flash.utils.ByteArray = untyped output.b;
+				byteArray.endian = if (output.bigEndian) flash.utils.Endian.BIG_ENDIAN else flash.utils.Endian.LITTLE_ENDIAN;
+				byteArray.writeUTF(string);
+				byteArray.endian = flash.utils.Endian.LITTLE_ENDIAN;
+			#end
+			
+			case OutputMode.WriteUtf:
+				if (data == null) {
+					output.writeByte(0xFF);
+					return mode;
+				} else {
+					output.writeByte(0);
+				}
+				untyped output.__writeUTF(data);
+				
+			case OutputMode.Any:
+				if (data == null) {
+					output.writeByte(0xFF);
+					return mode;
+				} else {
+					output.writeByte(0);
+				}
+				var string:String = data;
+				var bytes:Bytes = Bytes.ofString(data);
+				var length = bytes.length;
+				output.writeUInt16(length);
+				output.writeBytes(bytes, 0, length);
+				
+			case OutputMode.Unknown:
+				mode = 
+				#if flash
+				if (Std.is(output, BytesOutput)) {
+					OutputMode.Bytes;
+				} else 
+				#end
+				if (Reflect.hasField(output, "__writeUTF")) {
+					OutputMode.WriteUtf;
+				} else {
+					OutputMode.Any;
+				}
+				printString(data, output, mode);
+		}
 		return mode;
 	}
 	private static function printEnum(constructors:Map<Int, Array<String>>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
+		if (data == null) {
+			output.writeByte(0xFF);
+			return mode;
+		} else {
+			output.writeByte(0);
+		}
 		var index = Type.enumIndex(data);
 		var parameters = Type.enumParameters(data);
 		var parameterTypes = constructors[index];
@@ -55,6 +135,12 @@ class BytesPrinter
 	}
 	private static function printClassInstance(fields:Map<String, String>, fieldNames:Array<String>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
+		if (data == null) {
+			output.writeByte(0xFF);
+			return mode;
+		} else {
+			output.writeByte(0);
+		}
 		for (name in fieldNames)
 		{
 			mode = _printBytesWithInfo(
@@ -68,6 +154,12 @@ class BytesPrinter
 	}
 	private static function printStringMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
+		if (data == null) {
+			output.writeByte(0xFF);
+			return mode;
+		} else {
+			output.writeByte(0);
+		}
 		var map:StringMap<Dynamic> = data;
 		var typeInfo = TypePacker.resolveType(type);
 		var size = 0;
@@ -87,6 +179,12 @@ class BytesPrinter
 	}
 	private static function printIntMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
+		if (data == null) {
+			output.writeByte(0xFF);
+			return mode;
+		} else {
+			output.writeByte(0);
+		}
 		var map:IntMap<Dynamic> = data;
 		var typeInfo = TypePacker.resolveType(type);
 		var size = 0;
@@ -106,6 +204,12 @@ class BytesPrinter
 	}
 	private static function printCollection(elementType:String, type:CollectionType, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
+		if (data == null) {
+			output.writeByte(0xFF);
+			return mode;
+		} else {
+			output.writeByte(0);
+		}
 		var typeInfo = TypePacker.resolveType(elementType);
 		switch (type)
 		{
@@ -157,63 +261,6 @@ class BytesPrinter
 	private static function printClassType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		return printString(Type.getClassName(data), output, mode);
-	}
-    private static function printPrimitive(type:PrimitiveType, data:Dynamic, output:Output):Void 
-	{
-        switch (type) {
-            case PrimitiveType.INT   : output.writeInt32(data);
-            case PrimitiveType.BOOL  : output.writeByte(if (data) 1 else 0);
-            case PrimitiveType.FLOAT : output.writeDouble(data);
-        }
-    }
-	private static function printString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
-	{
-		switch (mode)
-		{
-			#if flash
-			case OutputMode.Bytes:
-				var string:String = data;
-				var byteArray:flash.utils.ByteArray = untyped output.b;
-				byteArray.endian = if (output.bigEndian) flash.utils.Endian.BIG_ENDIAN else flash.utils.Endian.LITTLE_ENDIAN;
-				byteArray.writeUTF(string);
-				byteArray.endian = flash.utils.Endian.LITTLE_ENDIAN;
-			#end
-			
-			case OutputMode.WriteUtf:
-				untyped output.__writeUTF(data);
-				
-			case OutputMode.Any:
-				var string:String = data;
-				#if neko
-				var length = untyped __dollar__ssize(bytes.length);
-				output.writeUInt16(length);
-				output.writeString(string);
-				#else
-				printBytes(Bytes.ofString(data), output);
-				#end
-				
-			case OutputMode.Unknown:
-				mode = 
-				#if flash
-				if (Std.is(output, BytesOutput)) {
-					OutputMode.Bytes;
-				} else 
-				#end
-				if (Reflect.hasField(output, "__writeUTF")) {
-					OutputMode.WriteUtf;
-				} else {
-					OutputMode.Any;
-				}
-				printString(data, output, mode);
-		}
-		return mode;
-	}
-	private static function printBytes(data:Dynamic, output:Output):Void
-	{
-		var bytes:Bytes = data;
-		var length = bytes.length;
-		output.writeUInt16(length);
-		output.writeBytes(bytes, 0, length);
 	}
 }
 

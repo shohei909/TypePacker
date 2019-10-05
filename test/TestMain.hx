@@ -1,4 +1,5 @@
 package;
+import cases.BytesPackerTestCase;
 import cases.JsonPackerTestCase;
 import cases.TypePackerTestCase;
 import nanotest.NanoTestRunner;
@@ -14,6 +15,7 @@ class TestMain
         var runner = new NanoTestRunner();
         runner.add(new TypePackerTestCase());
         runner.add(new JsonPackerTestCase());
+        runner.add(new BytesPackerTestCase());
 
 #if (js || cpp || flash)
         //runner.add(new cases.YamlPackerTestCase());

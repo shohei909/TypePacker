@@ -46,6 +46,10 @@ class BaseTestCase extends NanoTestCase
         }
     }
 
+    public function assertListEquals<T>(expected:List<T>, actual:List<T>, ?p:PosInfos)
+    {
+        assertArrayEquals(Lambda.array(expected), Lambda.array(actual), p);
+    }
     public function checkPacker(packer:PackerBase) {
         assertNotEquals(null, packer.parse("Map<Int, List<String>>", packer.print("Map<Int, List<String>>", [1 => Lambda.list(["1"])])));
         assertNotEquals(null, packer.parse("Map<String, Int>", packer.print("Map<String, Int>", ["1" => 1])));
