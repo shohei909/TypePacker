@@ -7,6 +7,7 @@ import cases.sample.Sample.SampleStruct;
 import haxe.ds.Vector;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
+import typepacker.bytes.BytesPacker;
 import typepacker.bytes.BytesParser;
 import typepacker.bytes.BytesPrinter;
 import typepacker.core.TypeInformation;
@@ -83,12 +84,13 @@ class BytesPackerTestCase extends BaseTestCase
 	{
         assertArrayEquals(value, convert(info, value));
 	}
+	
+	private static var packer:BytesPacker = new BytesPacker();
 	private static function convert<T>(info:TypeInformation<T>, value:T):T
 	{
 		var bytesOutput = new BytesOutput();
-		new BytesPrinter().printBytesWithInfo(info, value, bytesOutput);
-		
+		packer.printBytesWithInfo(info, value, bytesOutput);
 		var bytesInput = new BytesInput(bytesOutput.getBytes());
-		return new BytesParser().parseBytesWithInfo(info, bytesInput);
+		return packer.parseBytesWithInfo(info, bytesInput);
 	}
 }
