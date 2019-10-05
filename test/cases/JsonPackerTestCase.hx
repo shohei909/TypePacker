@@ -15,9 +15,10 @@ import typepacker.json.JsonPacker;
 class JsonPackerTestCase extends BaseTestCase
 {
 
-    public function new()
+    public function new(useEnumIndex:Bool)
     {
         super();
+		Json.defaultPacker.setting.useEnumIndex = useEnumIndex;
     }
 
     public function testPrint() {
@@ -29,7 +30,11 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals("[null,{}]", Json.print("ArrayEmpty", [null, { } ]));
         assertEquals("{\"i\":-12}", Json.print("IntData", { i : -12 } ));
         assertEquals("{\"i\":50}", Json.print("IntData", new SampleClass()));
-        assertEquals("[\"NONE\"]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
+		if (Json.defaultPacker.setting.useEnumIndex) {
+			assertEquals("[1]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
+		} else {
+			assertEquals("[\"NONE\"]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
+		}
 		assertEquals("\"cases.sample.SampleClass\"", Json.print("Class<SampleClass>", SampleClass));
 		assertEquals("\"cases.sample.SampleEnum\"", Json.print("Enum<SampleEnum>", SampleEnum));
     }
@@ -50,11 +55,16 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals(null, cl.str);
 
         var data = Json.parse("IntData", "{\"i\":-12}");
-        assertEquals(-12, data.i);
-        assertEquals(SampleEnum.NONE, Json.parse("SampleEnum", "[\"NONE\"]"));
-
-        var abst = Json.parse("SampleAbstract", "[\"NONE\"]");
-        assertEquals("NONE", abst.name());
+        assertEquals( -12, data.i);
+		if (Json.defaultPacker.setting.useEnumIndex) {
+			assertEquals(SampleEnum.NONE, Json.parse("SampleEnum", "[1]"));
+			var abst = Json.parse("SampleAbstract", "[1]");
+			assertEquals("NONE", abst.name());
+		} else {
+			assertEquals(SampleEnum.NONE, Json.parse("SampleEnum", "[\"NONE\"]"));
+			var abst = Json.parse("SampleAbstract", "[\"NONE\"]");
+			assertEquals("NONE", abst.name());
+		}
 		
     	assertEquals((cases.sample.Sample.SampleClass:Dynamic), Json.parse("Class<SampleClass>", "\"cases.sample.SampleClass\""));
     	assertEquals((cases.sample.Sample.SampleEnum:Dynamic), Json.parse("Enum<SampleClass>", "\"cases.sample.SampleEnum\""));

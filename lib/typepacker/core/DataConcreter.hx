@@ -31,7 +31,7 @@ class DataConcreter {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
                 }
-			case TypeInformation.CLASS_TYPE:
+            case TypeInformation.CLASS_TYPE:
                 if (data == null) {
                     null;
                 } else if (Std.is(data, String)) {
@@ -39,7 +39,7 @@ class DataConcreter {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
                 }
-			case TypeInformation.ENUM_TYPE:
+            case TypeInformation.ENUM_TYPE:
                 if (data == null) {
                     null;
                 } else if (Std.is(data, String)) {
@@ -126,18 +126,29 @@ class DataConcreter {
 
     private function concreteEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constractors:Map<Int, Array<String>>, data:Dynamic):EnumValue {
         if (data == null) return null;
-		if (_enum == null) _enum = Type.resolveEnum(name);
+        if (_enum == null) _enum = Type.resolveEnum(name);
         if (!Std.is(data, Array)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be array");
         }
 
         var array:Array<Dynamic> = data;
-        if (!Std.is(array[0], String)) {
-            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be string");
+        var index:Int;
+        if (setting.useEnumIndex)
+        {
+            if (!Std.is(array[0], Int)) {
+                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be int");
+            }
+            index = array[0];
         }
-
-        var c:String = array[0];
-        var paramTypes = constractors[keys[c]];
+        else
+        {
+            if (!Std.is(array[0], String)) {
+                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be string");
+            }
+            var c:String = array[0];
+            index = keys[c];
+        }
+        var paramTypes = constractors[index];
         var params = [];
 
         for (i in 0...paramTypes.length) {
@@ -145,12 +156,12 @@ class DataConcreter {
             params.push(concrete(type, array[i + 1]));
         }
 
-        return Type.createEnum(_enum, c, params);
+        return Type.createEnumIndex(_enum, index, params);
     }
 
     private function concreteClass(name:String, _class:Class<Dynamic>, fields:Map<String,String>, data:Dynamic):Dynamic {
         if (data == null) return null;
-		if (_class == null) _class = Type.resolveClass(name);
+        if (_class == null) _class = Type.resolveClass(name);
         var result = Type.createEmptyInstance(_class);
         for (key in fields.keys()) {
             var type = TypePacker.resolveType(fields[key]);

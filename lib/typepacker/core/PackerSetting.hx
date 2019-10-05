@@ -4,6 +4,8 @@ import haxe.ds.Vector;
 
 class PackerSetting {
 	public var forceNullable = false;
+	public var useEnumIndex = false;
+	
     public function new () {}
 }
 

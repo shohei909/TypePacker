@@ -14,7 +14,8 @@ class TestMain
     {
         var runner = new NanoTestRunner();
         runner.add(new TypePackerTestCase());
-        runner.add(new JsonPackerTestCase());
+        runner.add(new JsonPackerTestCase(true));
+        runner.add(new JsonPackerTestCase(false));
         runner.add(new BytesPackerTestCase());
 
 #if (js || cpp || flash)

@@ -118,10 +118,19 @@ class DataSimplifier {
         }
 
         var result:Array<Dynamic> = [];
-
-        var c = Type.enumConstructor(data);
-        result.push(c);
-        var paramTypes = constractors[keys[c]];
+		var index:Int;
+		if (setting.useEnumIndex)
+		{
+			index = Type.enumIndex(data);
+			result.push(index);
+		}
+		else
+		{
+			var c = Type.enumConstructor(data);
+			result.push(c);
+			index = keys[c];
+		}
+        var paramTypes = constractors[index];
         var params = Type.enumParameters(data);
 
         for (i in 0...paramTypes.length) {
