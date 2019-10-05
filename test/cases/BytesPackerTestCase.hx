@@ -86,9 +86,9 @@ class BytesPackerTestCase extends BaseTestCase
 	private static function convert<T>(info:TypeInformation<T>, value:T):T
 	{
 		var bytesOutput = new BytesOutput();
-		BytesPrinter.printBytesWithInfo(info, value, bytesOutput);
+		new BytesPrinter().printBytesWithInfo(info, value, bytesOutput);
 		
 		var bytesInput = new BytesInput(bytesOutput.getBytes());
-		return BytesParser.parseBytesWithInfo(info, bytesInput);
+		return new BytesParser().parseBytesWithInfo(info, bytesInput);
 	}
 }

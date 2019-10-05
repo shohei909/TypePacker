@@ -6,13 +6,25 @@ import haxe.io.BytesBuffer;
 import haxe.io.BytesOutput;
 import haxe.io.Output;
 import typepacker.bytes.BytesPrinter.OutputMode;
+import typepacker.core.PackerSetting;
 import typepacker.core.TypeInformation;
 import typepacker.core.TypePacker;
 import yaml.util.IntMap;
 
 class BytesPrinter
 {
-	public static function printBytesWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
+	var setting:PackerSetting;
+
+    public function new(?setting:PackerSetting) {
+		if (setting == null)
+		{
+			setting = new PackerSetting();
+			setting.useEnumIndex = true;
+		}
+        this.setting = setting;
+    }
+	
+	public function printBytesWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
         _printBytesWithInfo(
 			info,
 			data,
@@ -20,12 +32,12 @@ class BytesPrinter
 			OutputMode.Unknown
 		);
     }
-	private static function _printBytesWithInfo(info:TypeInformation<Dynamic>, data:Dynamic, output:Output, mode:OutputMode):OutputMode 
+	private function _printBytesWithInfo(info:TypeInformation<Dynamic>, data:Dynamic, output:Output, mode:OutputMode):OutputMode 
 	{
 		switch (info) {
             case TypeInformation.PRIMITIVE(nullable, type)                                       : printPrimitive(nullable, type, data, output);
             case TypeInformation.STRING                                                          : mode = printString(data, output, mode); 
-            case TypeInformation.ENUM(_, _, _, constractors)                                     : mode = printEnum(constractors, data, output, mode);
+            case TypeInformation.ENUM(_, _, keys, constractors)                                  : mode = printEnum(keys, constractors, data, output, mode);
             case TypeInformation.CLASS(_, _, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = printClassInstance(fields, fieldNames, data, output, mode);
             case TypeInformation.MAP(STRING, value)                                              : mode = printStringMap(value, data, output, mode);
             case TypeInformation.MAP(INT, value)                                                 : mode = printIntMap(value, data, output, mode);
@@ -36,9 +48,9 @@ class BytesPrinter
         }
 		return mode;
 	}
-    private static function printPrimitive(nullable:Bool, type:PrimitiveType, data:Dynamic, output:Output):Void 
+    private function printPrimitive(nullable:Bool, type:PrimitiveType, data:Dynamic, output:Output):Void 
 	{
-		if (nullable) {
+		if (nullable || setting.forceNullable) {
 			if (data == null) {
 				output.writeByte(0xFF);
 				return;
@@ -53,18 +65,22 @@ class BytesPrinter
             case PrimitiveType.FLOAT : output.writeDouble(data);
         }
     }
-	private static function printString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		if (data == null) {
+			output.writeByte(0xFF);
+			return mode;
+		} else {
+			output.writeByte(0);
+		}
+		return _printString(data, output, mode);
+	}
+	private function _printString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		switch (mode)
 		{
 			#if flash
 			case OutputMode.Bytes:
-				if (data == null) {
-					output.writeByte(0xFF);
-					return mode;
-				} else {
-					output.writeByte(0);
-				}
 				var string:String = data;
 				var byteArray:flash.utils.ByteArray = untyped output.b;
 				byteArray.endian = if (output.bigEndian) flash.utils.Endian.BIG_ENDIAN else flash.utils.Endian.LITTLE_ENDIAN;
@@ -73,21 +89,9 @@ class BytesPrinter
 			#end
 			
 			case OutputMode.WriteUtf:
-				if (data == null) {
-					output.writeByte(0xFF);
-					return mode;
-				} else {
-					output.writeByte(0);
-				}
 				untyped output.__writeUTF(data);
 				
 			case OutputMode.Any:
-				if (data == null) {
-					output.writeByte(0xFF);
-					return mode;
-				} else {
-					output.writeByte(0);
-				}
 				var string:String = data;
 				var bytes:Bytes = Bytes.ofString(data);
 				var length = bytes.length;
@@ -106,11 +110,11 @@ class BytesPrinter
 				} else {
 					OutputMode.Any;
 				}
-				printString(data, output, mode);
+				_printString(data, output, mode);
 		}
 		return mode;
 	}
-	private static function printEnum(constructors:Map<Int, Array<String>>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printEnum(keys:Map<String, Int>, constructors:Map<Int, Array<String>>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -118,11 +122,22 @@ class BytesPrinter
 		} else {
 			output.writeByte(0);
 		}
-		var index = Type.enumIndex(data);
-		var parameters = Type.enumParameters(data);
-		var parameterTypes = constructors[index];
 		
-		output.writeUInt16(index);
+		var index:Int;
+		if (setting.useEnumIndex)
+		{
+			index = Type.enumIndex(data);
+			output.writeUInt16(index);
+		}
+		else
+		{
+			var c = Type.enumConstructor(data);
+			index = keys[c];
+			mode = _printString(c, output, mode);
+		}
+        var parameterTypes = constructors[index];
+        var parameters = Type.enumParameters(data);
+		
 		for (i in 0...parameterTypes.length)
 		{
 			mode = _printBytesWithInfo(
@@ -134,7 +149,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private static function printClassInstance(fields:Map<String, String>, fieldNames:Array<String>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printClassInstance(fields:Map<String, String>, fieldNames:Array<String>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -153,7 +168,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private static function printStringMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printStringMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -178,7 +193,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private static function printIntMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printIntMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -203,7 +218,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private static function printCollection(elementType:String, type:CollectionType, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printCollection(elementType:String, type:CollectionType, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -250,7 +265,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private static function printAbstract(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printAbstract(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		return _printBytesWithInfo(
 			TypePacker.resolveType(type), 
@@ -259,11 +274,11 @@ class BytesPrinter
 			mode
 		);
 	}
-	private static function printClassType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printClassType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		return printString(Type.getClassName(data), output, mode);
 	}
-	private static function printEnumType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function printEnumType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		return printString(Type.getEnumName(data), output, mode);
 	}

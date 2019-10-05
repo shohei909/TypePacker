@@ -6,16 +6,28 @@ import haxe.ds.Vector;
 import haxe.io.Bytes;
 import haxe.io.Input;
 import haxe.io.Output;
+import typepacker.core.PackerSetting;
 import typepacker.core.TypeInformation;
 import typepacker.core.TypePacker;
 
 class BytesParser 
 {
-	public static function parseBytesWithInfo<T>(info:TypeInformation<T>, input:Input):T {
+	var setting:PackerSetting;
+
+    public function new(?setting:PackerSetting) {
+		if (setting == null)
+		{
+			setting = new PackerSetting();
+			setting.useEnumIndex = true;
+		}
+        this.setting = setting;
+    }
+	
+	public function parseBytesWithInfo<T>(info:TypeInformation<T>, input:Input):T {
         return switch (info) {
             case TypeInformation.PRIMITIVE(nullable, type)               : parsePrimitive(nullable, type, input);
             case TypeInformation.STRING                                  : parseString(input); 
-            case TypeInformation.ENUM(name, _enum, _, constractors)      : parseEnum(name, _enum, constractors, input);
+            case TypeInformation.ENUM(name, _enum, keys, constractors)   : parseEnum(name, _enum, keys, constractors, input);
             case TypeInformation.CLASS(name, _class, fields, fieldNames) : parseClassInstance(name, _class, fields, fieldNames, input);
 			case TypeInformation.ANONYMOUS(fields, fieldNames)           : parseAnonymous(fields, fieldNames, input);
             case TypeInformation.MAP(STRING, value)                      : parseStringMap(value, input);
@@ -26,9 +38,9 @@ class BytesParser
             case TypeInformation.ENUM_TYPE                               : parseEnumType(input);
         }
     }
-    private static function parsePrimitive(nullable:Bool, type:PrimitiveType, input:Input):Dynamic
+    private function parsePrimitive(nullable:Bool, type:PrimitiveType, input:Input):Dynamic
 	{
-		if (nullable) {
+		if (nullable || setting.forceNullable) {
 			var byte = input.readByte();
 			if (byte == 0xFF) {
 				return null;
@@ -40,7 +52,7 @@ class BytesParser
             case PrimitiveType.FLOAT : input.readDouble();
         }
     }
-	private static function parseString(input:Input):Dynamic
+	private function parseString(input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -49,14 +61,24 @@ class BytesParser
 		var length = input.readUInt16() + byte * 0x10000;
 		return input.readString(length);
 	}
-	private static function parseEnum(name:String, _enum:Enum<Dynamic>, constructors:Map<Int, Array<String>>, input:Input):Dynamic
+	private function parseEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constructors:Map<Int, Array<String>>, input:Input):Dynamic
 	{
 		if (_enum == null) _enum = Type.resolveEnum(name);
 		var byte = input.readByte();
 		if (byte == 0xFF) {
 			return null;
 		}
-		var index = input.readUInt16() + byte * 0x10000;
+		var index:Int;
+        if (setting.useEnumIndex)
+        {
+            index = input.readUInt16() + byte * 0x10000;
+        }
+        else
+        {
+			var length = input.readUInt16() + byte * 0x10000;
+            var c:String = input.readString(length);
+            index = keys[c];
+        }
 		var parameters = [];
 		for (parameterType in constructors[index])
 		{
@@ -69,7 +91,7 @@ class BytesParser
 		}
 		return Type.createEnumIndex(_enum, index, parameters);
 	}
-	private static function parseClassInstance(name:String, _class:Class<Dynamic>, fields:Map<String, String>, fieldNames:Array<String>, input:Input):Dynamic
+	private function parseClassInstance(name:String, _class:Class<Dynamic>, fields:Map<String, String>, fieldNames:Array<String>, input:Input):Dynamic
 	{
 		if (_class == null) _class = Type.resolveClass(name);
 		var byte = input.readByte();
@@ -87,7 +109,7 @@ class BytesParser
 		}
 		return data;
 	}
-	private static function parseAnonymous(fields:Map<String, String>, fieldNames:Array<String>, input:Input):Dynamic
+	private function parseAnonymous(fields:Map<String, String>, fieldNames:Array<String>, input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -104,7 +126,7 @@ class BytesParser
 		}
 		return data;
 	}
-	private static function parseStringMap(type:String, input:Input):Dynamic
+	private function parseStringMap(type:String, input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -124,7 +146,7 @@ class BytesParser
 		}
 		return map;
 	}
-	private static function parseIntMap(type:String, input:Input):Dynamic
+	private function parseIntMap(type:String, input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -144,7 +166,7 @@ class BytesParser
 		}
 		return map;
 	}
-	private static function parseCollection(elementType:String, type:CollectionType, input:Input):Dynamic
+	private function parseCollection(elementType:String, type:CollectionType, input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -189,18 +211,18 @@ class BytesParser
 				vec;
 		}
 	}
-	private static function parseAbstract(type:String, input:Input):Dynamic
+	private function parseAbstract(type:String, input:Input):Dynamic
 	{
 		return parseBytesWithInfo(
 			TypePacker.resolveType(type), 
 			input
 		);
 	}
-	private static function parseClassType(input:Input):Dynamic
+	private function parseClassType(input:Input):Dynamic
 	{
 		return Type.resolveClass(parseString(input));
 	}
-	private static function parseEnumType(input:Input):Dynamic
+	private function parseEnumType(input:Input):Dynamic
 	{
 		return Type.resolveEnum(parseString(input));
 	}
