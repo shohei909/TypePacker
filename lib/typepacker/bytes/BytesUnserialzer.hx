@@ -4,6 +4,7 @@ import haxe.ds.List;
 import haxe.ds.StringMap;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
+import haxe.io.FPHelper;
 import haxe.io.Input;
 import haxe.io.Output;
 import typepacker.core.PackerSetting;
@@ -47,9 +48,9 @@ class BytesUnserialzer
 			}
 		}
         return switch (type) {
-            case PrimitiveType.INT   : input.readInt32();
+            case PrimitiveType.INT   : unserializeInt32(input);
             case PrimitiveType.BOOL  : input.readByte() != 0;
-            case PrimitiveType.FLOAT : input.readDouble();
+            case PrimitiveType.FLOAT : unserializeDouble(input);
         }
     }
 	private function unserializeString(input:Input):Dynamic
@@ -58,7 +59,7 @@ class BytesUnserialzer
 		if (byte == 0xFF) {
 			return null;
 		}
-		var length = input.readUInt16() + byte * 0x10000;
+		var length = unserializeUInt16(input);
 		return input.readString(length);
 	}
 	private function unserializeEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constructors:Map<Int, Array<String>>, input:Input):Dynamic
@@ -71,11 +72,11 @@ class BytesUnserialzer
 		var index:Int;
         if (setting.useEnumIndex)
         {
-            index = input.readUInt16() + byte * 0x10000;
+            index = unserializeUInt16(input);
         }
         else
         {
-			var length = input.readUInt16() + byte * 0x10000;
+			var length = unserializeUInt16(input);
             var c:String = input.readString(length);
             index = keys[c];
         }
@@ -134,7 +135,7 @@ class BytesUnserialzer
 		}
 		var map:StringMap<Dynamic> = new StringMap();
 		var typeInfo = TypePacker.resolveType(type);
-		var size = input.readUInt16() + byte * 0x10000;
+		var size = unserializeUInt16(input);
 		for (i in 0...size) 
 		{
 			var key = unserializeString(input);
@@ -154,10 +155,10 @@ class BytesUnserialzer
 		}
 		var map:IntMap<Dynamic> = new IntMap();
 		var typeInfo = TypePacker.resolveType(type);
-		var size = input.readUInt16() + byte * 0x10000;
+		var size = unserializeUInt16(input);
 		for (i in 0...size) 
 		{
-			var key = input.readInt32();
+			var key = unserializeInt32(input);
 			var value = unserializeWithInfo(
 				typeInfo,
 				input
@@ -173,7 +174,7 @@ class BytesUnserialzer
 			return null;
 		}
 		var typeInfo = TypePacker.resolveType(elementType);
-		var length = input.readUInt16() + byte;
+		var length = unserializeUInt16(input);
 		return switch (type)
 		{
 			case CollectionType.ARRAY:
@@ -225,5 +226,22 @@ class BytesUnserialzer
 	private function unserializeEnumType(input:Input):Dynamic
 	{
 		return Type.resolveEnum(unserializeString(input));
+	}
+	private function unserializeInt32(input:Input):Int {
+		var ch1 = input.readByte();
+		var ch2 = input.readByte();
+		var ch3 = input.readByte();
+		var ch4 = input.readByte();
+		return (ch4 << 24) | (ch3 << 16) | (ch2 << 8) | ch1;
+	}
+	private function unserializeUInt16(input:Input):Int {
+		var ch1 = input.readByte();
+		var ch2 = input.readByte();
+		return (ch2 << 8) | ch1;
+	}
+	private function unserializeDouble(input:Input):Float {
+		var i1 = unserializeInt32(input);
+		var i2 = unserializeInt32(input);
+		return FPHelper.i64ToDouble(i1, i2);
 	}
 }

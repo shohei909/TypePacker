@@ -1,9 +1,10 @@
 package typepacker.json;
-import typepacker.core.TypeInformation;
-import typepacker.core.TypePacker;
 
 #if macro
 import haxe.macro.Expr;
+import typepacker.core.TypePacker;
+#else
+import typepacker.core.TypeInformation;
 #end
 
 class Json {

@@ -1,8 +1,14 @@
 package typepacker.bytes;
+
+#if macro
+import haxe.macro.Expr;
+import typepacker.core.TypePacker;
+#else
 import haxe.io.Input;
 import haxe.io.Output;
 import typepacker.core.TypeInformation;
-import typepacker.core.TypePacker;
+#end
+
 
 class BytesPack 
 {
@@ -30,12 +36,18 @@ class BytesPack
 
     macro public static function serialize(type:String, data:Expr) {
         var info = TypePacker.toTypeInformation(type);
-        return macro typepacker.bytes.BytesPack.serializeWithInfo($info, $data);
+        return macro {
+			var output = new haxe.io.BytesOutput();
+			typepacker.bytes.BytesPack.serializeWithInfo($info, $data, output);
+			output.getBytes();
+		}
     }
 
     macro public static function unserialize(type:String, data:Expr) {
         var info = TypePacker.toTypeInformation(type);
-        return macro typepacker.bytes.BytesPack.unserializeWithInfo($info, $data);
+        return macro {
+			var input = new haxe.io.BytesInput($data);
+			typepacker.bytes.BytesPack.unserializeWithInfo($info, input);
+		}
     }
-	
 }

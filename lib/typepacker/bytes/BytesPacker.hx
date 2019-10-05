@@ -40,15 +40,5 @@ class BytesPacker
         return unserializer.unserializeWithInfo(info, input);
     }
 	#end
-	 
-    macro public function serialize(self:Expr, type:String, data:Expr, output:Expr) {
-        var complexType = TypePacker.stringToComplexType(type);
-        var info = TypePacker.complexTypeToTypeInformation(complexType);
-        return macro $self.serializeWithInfo($info, ($data : $complexType));
-    }
-
-    macro public function unserialize(self:Expr, type:String, input:Expr) {
-        var info = TypePacker.toTypeInformation(type);
-        return macro $self.unserializeWithInfo($info, $data);
-    }
+	
 }

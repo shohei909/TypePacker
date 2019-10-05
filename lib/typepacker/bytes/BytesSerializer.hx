@@ -4,6 +4,7 @@ import haxe.ds.Vector;
 import haxe.io.Bytes;
 import haxe.io.BytesBuffer;
 import haxe.io.BytesOutput;
+import haxe.io.FPHelper;
 import haxe.io.Output;
 import typepacker.bytes.BytesSerializer.OutputMode;
 import typepacker.core.PackerSetting;
@@ -60,9 +61,9 @@ class BytesSerializer
 		}
 		
         switch (type) {
-            case PrimitiveType.INT   : output.writeInt32(data);
+            case PrimitiveType.INT   : serializeInt32(data, output);
             case PrimitiveType.BOOL  : output.writeByte(if (data) 1 else 0);
-            case PrimitiveType.FLOAT : output.writeDouble(data);
+            case PrimitiveType.FLOAT : serializeDouble(data, output);
         }
     }
 	private function serializeString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
@@ -83,9 +84,7 @@ class BytesSerializer
 			case OutputMode.Bytes:
 				var string:String = data;
 				var byteArray:flash.utils.ByteArray = untyped output.b;
-				byteArray.endian = if (output.bigEndian) flash.utils.Endian.BIG_ENDIAN else flash.utils.Endian.LITTLE_ENDIAN;
 				byteArray.writeUTF(string);
-				byteArray.endian = flash.utils.Endian.LITTLE_ENDIAN;
 			#end
 			
 			case OutputMode.WriteUtf:
@@ -95,7 +94,7 @@ class BytesSerializer
 				var string:String = data;
 				var bytes:Bytes = Bytes.ofString(data);
 				var length = bytes.length;
-				output.writeUInt16(length);
+				serializeUInt16(length, output);
 				output.writeBytes(bytes, 0, length);
 				
 			case OutputMode.Unknown:
@@ -127,7 +126,7 @@ class BytesSerializer
 		if (setting.useEnumIndex)
 		{
 			index = Type.enumIndex(data);
-			output.writeUInt16(index);
+			serializeUInt16(index, output);
 		}
 		else
 		{
@@ -180,7 +179,7 @@ class BytesSerializer
 		var typeInfo = TypePacker.resolveType(type);
 		var size = 0;
 		for (key in map.keys()) size += 1;
-		output.writeUInt16(size);
+		serializeUInt16(size, output);
 		for (key in map.keys()) 
 		{
 			mode = serializeString(key, output, mode);
@@ -205,10 +204,10 @@ class BytesSerializer
 		var typeInfo = TypePacker.resolveType(type);
 		var size = 0;
 		for (key in map.keys()) size += 1;
-		output.writeUInt16(size);
+		serializeUInt16(size, output);
 		for (key in map.keys()) 
 		{
-			output.writeInt32(key);
+			serializeInt32(key, output);
 			mode = _serializeWithInfo(
 				typeInfo,
 				map.get(key), 
@@ -231,7 +230,7 @@ class BytesSerializer
 		{
 			case CollectionType.ARRAY:
 				var arr:Array<Dynamic> = data;
-				output.writeUInt16(arr.length);
+				serializeUInt16(arr.length, output);
 				for (element in arr) {
 					mode = _serializeWithInfo(
 						typeInfo,
@@ -242,7 +241,7 @@ class BytesSerializer
 				}
 			case CollectionType.LIST:
 				var arr:List<Dynamic> = data;
-				output.writeUInt16(arr.length);
+				serializeUInt16(arr.length, output);
 				for (element in arr) {
 					mode = _serializeWithInfo(
 						typeInfo,
@@ -253,7 +252,7 @@ class BytesSerializer
 				}
 			case CollectionType.VECTOR:
 				var arr:Vector<Dynamic> = data;
-				output.writeUInt16(arr.length);
+				serializeUInt16(arr.length, output);
 				for (element in arr) {
 					mode = _serializeWithInfo(
 						typeInfo,
@@ -281,6 +280,22 @@ class BytesSerializer
 	private function serializeEnumType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		return serializeString(Type.getEnumName(data), output, mode);
+	}
+	private function serializeInt32(value:Int, output:Output):Void {
+		output.writeByte((value       ) & 0xFF);
+		output.writeByte((value >>   8) & 0xFF);
+		output.writeByte((value >>  16) & 0xFF);
+		output.writeByte((value >>> 24));
+	}
+	private function serializeUInt16(value:Int, output:Output):Void {
+		if(value < 0 || value >= 0x10000 ) throw haxe.io.Error.Overflow;
+		output.writeByte(value & 0xFF);
+		output.writeByte(value >> 8);
+	}
+	private function serializeDouble(value:Float, output:Output):Void {
+		var i64 = FPHelper.doubleToI64(value);
+		serializeInt32(i64.low , output);
+		serializeInt32(i64.high, output);
 	}
 }
 

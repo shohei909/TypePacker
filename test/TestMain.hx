@@ -16,7 +16,8 @@ class TestMain
         runner.add(new TypePackerTestCase());
         runner.add(new JsonPackerTestCase(true));
         runner.add(new JsonPackerTestCase(false));
-        runner.add(new BytesPackerTestCase());
+        runner.add(new BytesPackerTestCase(true));
+        runner.add(new BytesPackerTestCase(false));
 
 #if (js || cpp || flash)
         //runner.add(new cases.YamlPackerTestCase());

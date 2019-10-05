@@ -5,8 +5,10 @@ import cases.sample.Sample.SampleClass;
 import cases.sample.Sample.SampleEnum;
 import cases.sample.Sample.SampleStruct;
 import haxe.ds.Vector;
+import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
+import haxe.macro.Expr;
 import typepacker.bytes.BytesPack;
 import typepacker.bytes.BytesPacker;
 import typepacker.bytes.BytesUnserialzer;
@@ -16,9 +18,10 @@ import typepacker.core.TypePacker;
 
 class BytesPackerTestCase extends BaseTestCase
 {
-    public function new()
+    public function new(useEnumIndex:Bool)
     {
         super();
+		BytesPack.defaultPacker.setting.useEnumIndex = useEnumIndex;
     }
 
     public function testIo()
@@ -77,6 +80,38 @@ class BytesPackerTestCase extends BaseTestCase
 			assertEquals("NONE", data1.name());
 		}
 	}
+    public function testSerialize():Void
+	{
+		assertEquals("01000000"        , BytesPack.serialize("Int"         , 1       ).toHex());
+		assertEquals("666666666666e63f", BytesPack.serialize("Float"       , 0.7     ).toHex());
+		assertEquals("01"              , BytesPack.serialize("Bool"        , true    ).toHex());
+		assertEquals("0000"            , BytesPack.serialize("Null<Bool>"  , false   ).toHex());
+		assertEquals("ff"              , BytesPack.serialize("String"      , null    ).toHex());
+		assertEquals("000100ecfd0000"  , BytesPack.serialize("Array<Int>"  , [0xFDEC]).toHex());
+		
+		if (BytesPack.defaultPacker.setting.useEnumIndex) {
+			assertEquals("000100", BytesPack.serialize("SampleEnum", SampleEnum.NONE).toHex());
+		} else {
+			assertEquals("0004004e4f4e45", BytesPack.serialize("SampleEnum", SampleEnum.NONE).toHex());
+		}
+		#if !cs
+		assertEquals("ff"      , BytesPack.serialize("Null<Int>" , null ).toHex());
+		assertEquals("ff"      , BytesPack.serialize("Null<Bool>", null ).toHex());
+		#end
+	}
+    public function testUnserialize():Void
+	{
+		assertEquals(1    , BytesPack.unserialize("Int"       , Bytes.ofHex("01000000")));
+		assertEquals(0.7  , BytesPack.unserialize("Float"     , Bytes.ofHex("666666666666e63f")));
+		assertEquals(true , BytesPack.unserialize("Bool"      , Bytes.ofHex("01"      )));
+		assertEquals(false, BytesPack.unserialize("Null<Bool>", Bytes.ofHex("0000"    )));
+		assertEquals(null , BytesPack.unserialize("Null<Bool>", Bytes.ofHex("ff"      )));
+		assertEquals(null , BytesPack.unserialize("Null<Int>" , Bytes.ofHex("ff"      )));
+		assertEquals(null , BytesPack.unserialize("String"    , Bytes.ofHex("ff"      )));
+		assertEquals(null , BytesPack.unserialize("Array<Int>", Bytes.ofHex("ff"      )));
+		assertArrayEquals([0xFDEC], BytesPack.unserialize("Array<Int>", Bytes.ofHex("000100ecfd0000")));
+	}
+	
 	private function assertIo<T>(info:TypeInformation<T>, value:T):Void
 	{
         assertEquals(value, convert(info, value));
@@ -85,12 +120,19 @@ class BytesPackerTestCase extends BaseTestCase
 	{
         assertArrayEquals(value, convert(info, value));
 	}
-	
 	private static function convert<T>(info:TypeInformation<T>, value:T):T
+	{
+		return unserialize(info, serialize(info, value));
+	}
+	private static function serialize<T>(info:TypeInformation<T>, value:T):Bytes
 	{
 		var bytesOutput = new BytesOutput();
 		BytesPack.serializeWithInfo(info, value, bytesOutput);
-		var bytesInput = new BytesInput(bytesOutput.getBytes());
+		return bytesOutput.getBytes();
+	}
+	private static function unserialize<T>(info:TypeInformation<T>, data:Bytes):T
+	{
+		var bytesInput = new BytesInput(data);
 		return BytesPack.unserializeWithInfo(info, bytesInput);
 	}
 }
