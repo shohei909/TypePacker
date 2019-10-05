@@ -5,7 +5,7 @@ enum TypeInformation<T>
 {
     ANONYMOUS(fieldTypes:Map<String,String>, fieldNames:Array<String>);
     CLASS(type:String, fieldTypes:Map<String,String>, fieldNames:Array<String>);
-    ENUM(type:String, constructors:Map<String, Array<String>>, constructorNames:Array<String>);
+    ENUM(type:String, keys:Map<String, Int>, constructors:Map<Int, Array<String>>);
     MAP(keyType:MapKeyType, valueType:String);
     ABSTRACT(baseType:String);
     COLLECTION(elementType:String, type:CollectionType);

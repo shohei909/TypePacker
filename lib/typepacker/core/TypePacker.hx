@@ -149,10 +149,11 @@ class TypePacker
             case TEnum(ref, params):
                 
                 var e = ref.get();
-                var map = new Map<String, Array<String>>();
-				var names = [];
+                var map = new Map<Int, Array<String>>();
+				var keys = new Map<String, Int>();
                 var childParamsMap = mapTypeParams(e.params, params);
-
+				
+				var index = 0;
                 for (key in e.names) {
                     var c = e.constructs.get(key);
                     var arr = [];
@@ -167,10 +168,11 @@ class TypePacker
                         default :
                             Context.error(name + " has unsupported constractor: " + c.type, Context.currentPos());
                     }
-                    map[key] = arr;
-					names.push(key);
+                    map[index] = arr;
+					keys[key] = index;
+					index += 1;
                 }
-                TypeInformation.ENUM(ref.toString(), map, names);
+                TypeInformation.ENUM(ref.toString(), keys, map);
 
             case TInst(ref, params) :
                 var struct = ref.get();

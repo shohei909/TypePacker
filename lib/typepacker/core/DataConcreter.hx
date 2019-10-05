@@ -39,8 +39,8 @@ class DataConcreter {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
                 }
-            case TypeInformation.ENUM(name, constractors, _):
-                (concreteEnum(name, constractors, data) : Dynamic);
+            case TypeInformation.ENUM(name, keys, constractors):
+                (concreteEnum(name, keys, constractors, data) : Dynamic);
             case TypeInformation.CLASS(name, fields, _) :
                 (concreteClass(name, fields, data) : Dynamic);
             case ANONYMOUS(fields, _) :
@@ -116,7 +116,7 @@ class DataConcreter {
         return Lambda.list(concreteArray(elementTypeString, data));
     }
 
-    private function concreteEnum(enumName:String, constractors:Map<String,Array<String>>, data:Dynamic):EnumValue {
+    private function concreteEnum(enumName:String, keys:Map<String, Int>, constractors:Map<Int, Array<String>>, data:Dynamic):EnumValue {
         if (data == null) return null;
         if (!Std.is(data, Array)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be array");
@@ -128,7 +128,7 @@ class DataConcreter {
         }
 
         var c:String = array[0];
-        var paramTypes = constractors[c];
+        var paramTypes = constractors[keys[c]];
         var params = [];
         var e = Type.resolveEnum(enumName);
 
