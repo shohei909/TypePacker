@@ -19,8 +19,8 @@ class BytesPacker
 {
     #if !macro
     public var setting(default, null):PackerSetting;
-	public var printer(default, null):BytesPrinter;
-	public var parser(default, null):BytesParser;
+	public var serializeer(default, null):BytesPrinter;
+	public var unserializer(default, null):BytesParser;
 	
     public function new(?setting:PackerSetting) {
 		if (setting == null)
@@ -29,26 +29,26 @@ class BytesPacker
 			setting.useEnumIndex = true;
 		}
         this.setting = setting;
-        this.printer = new BytesPrinter(setting);
-        this.parser = new BytesParser(setting);
+        this.serializeer = new BytesPrinter(setting);
+        this.unserializer = new BytesParser(setting);
     }
-    public function printBytesWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
-        return printer.printBytesWithInfo(info, data, output);
+    public function serializeWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
+        return serializeer.serializeWithInfo(info, data, output);
     }
 
-    public function parseBytesWithInfo<T>(info:TypeInformation<T>, input:Input):T {
-        return parser.parseBytesWithInfo(info, input);
+    public function unserializeWithInfo<T>(info:TypeInformation<T>, input:Input):T {
+        return unserializer.unserializeWithInfo(info, input);
     }
 	#end
 	 
-    macro public function print(self:Expr, type:String, data:Expr, output:Expr) {
+    macro public function serialize(self:Expr, type:String, data:Expr, output:Expr) {
         var complexType = TypePacker.stringToComplexType(type);
         var info = TypePacker.complexTypeToTypeInformation(complexType);
-        return macro $self.printWithInfo($info, ($data : $complexType));
+        return macro $self.serializeWithInfo($info, ($data : $complexType));
     }
 
-    macro public function parse(self:Expr, type:String, input:Expr) {
+    macro public function unserialize(self:Expr, type:String, input:Expr) {
         var info = TypePacker.toTypeInformation(type);
-        return macro $self.parseWithInfo($info, $data);
+        return macro $self.unserializeWithInfo($info, $data);
     }
 }

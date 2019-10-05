@@ -19,23 +19,23 @@ class BytesPack
         return _defaultPacker = packer;
     }
 
-    public static function printBytesWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
-        return defaultPacker.printBytesWithInfo(info, data, output);
+    public static function serializeWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
+        return defaultPacker.serializeWithInfo(info, data, output);
     }
 
-    public static function parseBytesWithInfo<T>(info:TypeInformation<T>, input:Input):T {
-        return defaultPacker.parseBytesWithInfo(info, input);
+    public static function unserializeWithInfo<T>(info:TypeInformation<T>, input:Input):T {
+        return defaultPacker.unserializeWithInfo(info, input);
     }
     #end
 
-    macro public static function print(type:String, data:Expr) {
+    macro public static function serialize(type:String, data:Expr) {
         var info = TypePacker.toTypeInformation(type);
-        return macro typepacker.bytes.BytesPack.printBytesWithInfo($info, $data);
+        return macro typepacker.bytes.BytesPack.serializeWithInfo($info, $data);
     }
 
-    macro public static function parse(type:String, data:Expr) {
+    macro public static function unserialize(type:String, data:Expr) {
         var info = TypePacker.toTypeInformation(type);
-        return macro typepacker.bytes.BytesPack.parseBytesWithInfo($info, $data);
+        return macro typepacker.bytes.BytesPack.unserializeWithInfo($info, $data);
     }
 	
 }

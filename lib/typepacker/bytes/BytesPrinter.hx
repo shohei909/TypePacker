@@ -24,31 +24,31 @@ class BytesPrinter
         this.setting = setting;
     }
 	
-	public function printBytesWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
-        _printBytesWithInfo(
+	public function serializeWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
+        _serializeWithInfo(
 			info,
 			data,
 			output,
 			OutputMode.Unknown
 		);
     }
-	private function _printBytesWithInfo(info:TypeInformation<Dynamic>, data:Dynamic, output:Output, mode:OutputMode):OutputMode 
+	private function _serializeWithInfo(info:TypeInformation<Dynamic>, data:Dynamic, output:Output, mode:OutputMode):OutputMode 
 	{
 		switch (info) {
-            case TypeInformation.PRIMITIVE(nullable, type)                                       : printPrimitive(nullable, type, data, output);
-            case TypeInformation.STRING                                                          : mode = printString(data, output, mode); 
-            case TypeInformation.ENUM(_, _, keys, constractors)                                  : mode = printEnum(keys, constractors, data, output, mode);
-            case TypeInformation.CLASS(_, _, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = printClassInstance(fields, fieldNames, data, output, mode);
-            case TypeInformation.MAP(STRING, value)                                              : mode = printStringMap(value, data, output, mode);
-            case TypeInformation.MAP(INT, value)                                                 : mode = printIntMap(value, data, output, mode);
-            case TypeInformation.COLLECTION(elementType, type)                                   : mode = printCollection(elementType, type, data, output, mode);
-            case TypeInformation.ABSTRACT(type)                                                  : mode = printAbstract(type, data, output, mode);
-            case TypeInformation.CLASS_TYPE                                                      : mode = printClassType(data, output, mode);
-            case TypeInformation.ENUM_TYPE                                                       : mode = printEnumType(data, output, mode);
+            case TypeInformation.PRIMITIVE(nullable, type)                                       : serializePrimitive(nullable, type, data, output);
+            case TypeInformation.STRING                                                          : mode = serializeString(data, output, mode); 
+            case TypeInformation.ENUM(_, _, keys, constractors)                                  : mode = serializeEnum(keys, constractors, data, output, mode);
+            case TypeInformation.CLASS(_, _, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = serializeClassInstance(fields, fieldNames, data, output, mode);
+            case TypeInformation.MAP(STRING, value)                                              : mode = serializeStringMap(value, data, output, mode);
+            case TypeInformation.MAP(INT, value)                                                 : mode = serializeIntMap(value, data, output, mode);
+            case TypeInformation.COLLECTION(elementType, type)                                   : mode = serializeCollection(elementType, type, data, output, mode);
+            case TypeInformation.ABSTRACT(type)                                                  : mode = serializeAbstract(type, data, output, mode);
+            case TypeInformation.CLASS_TYPE                                                      : mode = serializeClassType(data, output, mode);
+            case TypeInformation.ENUM_TYPE                                                       : mode = serializeEnumType(data, output, mode);
         }
 		return mode;
 	}
-    private function printPrimitive(nullable:Bool, type:PrimitiveType, data:Dynamic, output:Output):Void 
+    private function serializePrimitive(nullable:Bool, type:PrimitiveType, data:Dynamic, output:Output):Void 
 	{
 		if (nullable || setting.forceNullable) {
 			if (data == null) {
@@ -65,7 +65,7 @@ class BytesPrinter
             case PrimitiveType.FLOAT : output.writeDouble(data);
         }
     }
-	private function printString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -73,9 +73,9 @@ class BytesPrinter
 		} else {
 			output.writeByte(0);
 		}
-		return _printString(data, output, mode);
+		return _serializeString(data, output, mode);
 	}
-	private function _printString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function _serializeString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		switch (mode)
 		{
@@ -110,11 +110,11 @@ class BytesPrinter
 				} else {
 					OutputMode.Any;
 				}
-				_printString(data, output, mode);
+				_serializeString(data, output, mode);
 		}
 		return mode;
 	}
-	private function printEnum(keys:Map<String, Int>, constructors:Map<Int, Array<String>>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeEnum(keys:Map<String, Int>, constructors:Map<Int, Array<String>>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -133,14 +133,14 @@ class BytesPrinter
 		{
 			var c = Type.enumConstructor(data);
 			index = keys[c];
-			mode = _printString(c, output, mode);
+			mode = _serializeString(c, output, mode);
 		}
         var parameterTypes = constructors[index];
         var parameters = Type.enumParameters(data);
 		
 		for (i in 0...parameterTypes.length)
 		{
-			mode = _printBytesWithInfo(
+			mode = _serializeWithInfo(
 				TypePacker.resolveType(parameterTypes[i]), 
 				parameters[i], 
 				output, 
@@ -149,7 +149,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private function printClassInstance(fields:Map<String, String>, fieldNames:Array<String>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeClassInstance(fields:Map<String, String>, fieldNames:Array<String>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -159,7 +159,7 @@ class BytesPrinter
 		}
 		for (name in fieldNames)
 		{
-			mode = _printBytesWithInfo(
+			mode = _serializeWithInfo(
 				TypePacker.resolveType(fields[name]), 
 				Reflect.field(data, name), 
 				output, 
@@ -168,7 +168,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private function printStringMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeStringMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -183,8 +183,8 @@ class BytesPrinter
 		output.writeUInt16(size);
 		for (key in map.keys()) 
 		{
-			mode = printString(key, output, mode);
-			mode = _printBytesWithInfo(
+			mode = serializeString(key, output, mode);
+			mode = _serializeWithInfo(
 				typeInfo,
 				map.get(key), 
 				output, 
@@ -193,7 +193,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private function printIntMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeIntMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -209,7 +209,7 @@ class BytesPrinter
 		for (key in map.keys()) 
 		{
 			output.writeInt32(key);
-			mode = _printBytesWithInfo(
+			mode = _serializeWithInfo(
 				typeInfo,
 				map.get(key), 
 				output, 
@@ -218,7 +218,7 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private function printCollection(elementType:String, type:CollectionType, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeCollection(elementType:String, type:CollectionType, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {
 			output.writeByte(0xFF);
@@ -233,7 +233,7 @@ class BytesPrinter
 				var arr:Array<Dynamic> = data;
 				output.writeUInt16(arr.length);
 				for (element in arr) {
-					mode = _printBytesWithInfo(
+					mode = _serializeWithInfo(
 						typeInfo,
 						element, 
 						output, 
@@ -244,7 +244,7 @@ class BytesPrinter
 				var arr:List<Dynamic> = data;
 				output.writeUInt16(arr.length);
 				for (element in arr) {
-					mode = _printBytesWithInfo(
+					mode = _serializeWithInfo(
 						typeInfo,
 						element, 
 						output, 
@@ -255,7 +255,7 @@ class BytesPrinter
 				var arr:Vector<Dynamic> = data;
 				output.writeUInt16(arr.length);
 				for (element in arr) {
-					mode = _printBytesWithInfo(
+					mode = _serializeWithInfo(
 						typeInfo,
 						element, 
 						output, 
@@ -265,22 +265,22 @@ class BytesPrinter
 		}
 		return mode;
 	}
-	private function printAbstract(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeAbstract(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
-		return _printBytesWithInfo(
+		return _serializeWithInfo(
 			TypePacker.resolveType(type), 
 			data, 
 			output, 
 			mode
 		);
 	}
-	private function printClassType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeClassType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
-		return printString(Type.getClassName(data), output, mode);
+		return serializeString(Type.getClassName(data), output, mode);
 	}
-	private function printEnumType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	private function serializeEnumType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
-		return printString(Type.getEnumName(data), output, mode);
+		return serializeString(Type.getEnumName(data), output, mode);
 	}
 }
 

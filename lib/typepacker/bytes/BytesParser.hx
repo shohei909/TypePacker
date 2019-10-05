@@ -23,22 +23,22 @@ class BytesParser
         this.setting = setting;
     }
 	
-	public function parseBytesWithInfo<T>(info:TypeInformation<T>, input:Input):T {
+	public function unserializeWithInfo<T>(info:TypeInformation<T>, input:Input):T {
         return switch (info) {
-            case TypeInformation.PRIMITIVE(nullable, type)               : parsePrimitive(nullable, type, input);
-            case TypeInformation.STRING                                  : parseString(input); 
-            case TypeInformation.ENUM(name, _enum, keys, constractors)   : parseEnum(name, _enum, keys, constractors, input);
-            case TypeInformation.CLASS(name, _class, fields, fieldNames) : parseClassInstance(name, _class, fields, fieldNames, input);
-			case TypeInformation.ANONYMOUS(fields, fieldNames)           : parseAnonymous(fields, fieldNames, input);
-            case TypeInformation.MAP(STRING, value)                      : parseStringMap(value, input);
-            case TypeInformation.MAP(INT, value)                         : parseIntMap(value, input);
-            case TypeInformation.COLLECTION(elementType, type)           : parseCollection(elementType, type, input);
-            case TypeInformation.ABSTRACT(type)                          : parseAbstract(type, input);
-            case TypeInformation.CLASS_TYPE                              : parseClassType(input);
-            case TypeInformation.ENUM_TYPE                               : parseEnumType(input);
+            case TypeInformation.PRIMITIVE(nullable, type)               : unserializePrimitive(nullable, type, input);
+            case TypeInformation.STRING                                  : unserializeString(input); 
+            case TypeInformation.ENUM(name, _enum, keys, constractors)   : unserializeEnum(name, _enum, keys, constractors, input);
+            case TypeInformation.CLASS(name, _class, fields, fieldNames) : unserializeClassInstance(name, _class, fields, fieldNames, input);
+			case TypeInformation.ANONYMOUS(fields, fieldNames)           : unserializeAnonymous(fields, fieldNames, input);
+            case TypeInformation.MAP(STRING, value)                      : unserializeStringMap(value, input);
+            case TypeInformation.MAP(INT, value)                         : unserializeIntMap(value, input);
+            case TypeInformation.COLLECTION(elementType, type)           : unserializeCollection(elementType, type, input);
+            case TypeInformation.ABSTRACT(type)                          : unserializeAbstract(type, input);
+            case TypeInformation.CLASS_TYPE                              : unserializeClassType(input);
+            case TypeInformation.ENUM_TYPE                               : unserializeEnumType(input);
         }
     }
-    private function parsePrimitive(nullable:Bool, type:PrimitiveType, input:Input):Dynamic
+    private function unserializePrimitive(nullable:Bool, type:PrimitiveType, input:Input):Dynamic
 	{
 		if (nullable || setting.forceNullable) {
 			var byte = input.readByte();
@@ -52,7 +52,7 @@ class BytesParser
             case PrimitiveType.FLOAT : input.readDouble();
         }
     }
-	private function parseString(input:Input):Dynamic
+	private function unserializeString(input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -61,7 +61,7 @@ class BytesParser
 		var length = input.readUInt16() + byte * 0x10000;
 		return input.readString(length);
 	}
-	private function parseEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constructors:Map<Int, Array<String>>, input:Input):Dynamic
+	private function unserializeEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constructors:Map<Int, Array<String>>, input:Input):Dynamic
 	{
 		if (_enum == null) _enum = Type.resolveEnum(name);
 		var byte = input.readByte();
@@ -83,7 +83,7 @@ class BytesParser
 		for (parameterType in constructors[index])
 		{
 			parameters.push(
-				parseBytesWithInfo(
+				unserializeWithInfo(
 					TypePacker.resolveType(parameterType), 
 					input
 				)
@@ -91,7 +91,7 @@ class BytesParser
 		}
 		return Type.createEnumIndex(_enum, index, parameters);
 	}
-	private function parseClassInstance(name:String, _class:Class<Dynamic>, fields:Map<String, String>, fieldNames:Array<String>, input:Input):Dynamic
+	private function unserializeClassInstance(name:String, _class:Class<Dynamic>, fields:Map<String, String>, fieldNames:Array<String>, input:Input):Dynamic
 	{
 		if (_class == null) _class = Type.resolveClass(name);
 		var byte = input.readByte();
@@ -101,7 +101,7 @@ class BytesParser
 		var data = Type.createEmptyInstance(_class);
 		for (name in fieldNames)
 		{
-			var value = parseBytesWithInfo(
+			var value = unserializeWithInfo(
 				TypePacker.resolveType(fields[name]), 
 				input
 			);
@@ -109,7 +109,7 @@ class BytesParser
 		}
 		return data;
 	}
-	private function parseAnonymous(fields:Map<String, String>, fieldNames:Array<String>, input:Input):Dynamic
+	private function unserializeAnonymous(fields:Map<String, String>, fieldNames:Array<String>, input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -118,7 +118,7 @@ class BytesParser
 		var data = {};
 		for (name in fieldNames)
 		{
-			var value = parseBytesWithInfo(
+			var value = unserializeWithInfo(
 				TypePacker.resolveType(fields[name]), 
 				input
 			);
@@ -126,7 +126,7 @@ class BytesParser
 		}
 		return data;
 	}
-	private function parseStringMap(type:String, input:Input):Dynamic
+	private function unserializeStringMap(type:String, input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -137,8 +137,8 @@ class BytesParser
 		var size = input.readUInt16() + byte * 0x10000;
 		for (i in 0...size) 
 		{
-			var key = parseString(input);
-			var value = parseBytesWithInfo(
+			var key = unserializeString(input);
+			var value = unserializeWithInfo(
 				typeInfo,
 				input
 			);
@@ -146,7 +146,7 @@ class BytesParser
 		}
 		return map;
 	}
-	private function parseIntMap(type:String, input:Input):Dynamic
+	private function unserializeIntMap(type:String, input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -158,7 +158,7 @@ class BytesParser
 		for (i in 0...size) 
 		{
 			var key = input.readInt32();
-			var value = parseBytesWithInfo(
+			var value = unserializeWithInfo(
 				typeInfo,
 				input
 			);
@@ -166,7 +166,7 @@ class BytesParser
 		}
 		return map;
 	}
-	private function parseCollection(elementType:String, type:CollectionType, input:Input):Dynamic
+	private function unserializeCollection(elementType:String, type:CollectionType, input:Input):Dynamic
 	{
 		var byte = input.readByte();
 		if (byte == 0xFF) {
@@ -180,7 +180,7 @@ class BytesParser
 				var arr:Array<Dynamic> = [];
 				for (i in 0...length) {
 					arr.push(
-						parseBytesWithInfo(
+						unserializeWithInfo(
 							typeInfo,
 							input
 						)
@@ -192,7 +192,7 @@ class BytesParser
 				var arr:List<Dynamic> = new List();
 				for (i in 0...length) {
 					arr.add(
-						parseBytesWithInfo(
+						unserializeWithInfo(
 							typeInfo,
 							input
 						)
@@ -203,7 +203,7 @@ class BytesParser
 			case CollectionType.VECTOR:
 				var vec:Vector<Dynamic> = new Vector(length);
 				for (i in 0...length) {
-					vec[i] = parseBytesWithInfo(
+					vec[i] = unserializeWithInfo(
 						typeInfo,
 						input
 					);
@@ -211,19 +211,19 @@ class BytesParser
 				vec;
 		}
 	}
-	private function parseAbstract(type:String, input:Input):Dynamic
+	private function unserializeAbstract(type:String, input:Input):Dynamic
 	{
-		return parseBytesWithInfo(
+		return unserializeWithInfo(
 			TypePacker.resolveType(type), 
 			input
 		);
 	}
-	private function parseClassType(input:Input):Dynamic
+	private function unserializeClassType(input:Input):Dynamic
 	{
-		return Type.resolveClass(parseString(input));
+		return Type.resolveClass(unserializeString(input));
 	}
-	private function parseEnumType(input:Input):Dynamic
+	private function unserializeEnumType(input:Input):Dynamic
 	{
-		return Type.resolveEnum(parseString(input));
+		return Type.resolveEnum(unserializeString(input));
 	}
 }
