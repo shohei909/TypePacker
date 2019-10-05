@@ -1,37 +1,164 @@
 package typepacker.bytes;
+import haxe.ds.StringMap;
+import haxe.ds.Vector;
 import haxe.io.Bytes;
 import haxe.io.BytesBuffer;
 import haxe.io.BytesOutput;
 import haxe.io.Output;
+import typepacker.bytes.BytesPrinter.OutputMode;
 import typepacker.core.TypeInformation;
+import typepacker.core.TypePacker;
+import yaml.util.IntMap;
 
 class BytesPrinter
 {
-	private static var bytesBuffer:BytesBuffer;
-	
 	public static function printBytesWithInfo<T>(info:TypeInformation<T>, data:T, output:Output):Void {
-        return _printBytesWithInfo(
+        _printBytesWithInfo(
 			info,
 			data,
 			output,
 			OutputMode.Unknown
 		);
     }
-	private static function _printBytesWithInfo(info:TypeInformation<Dynamic>, data:Dynamic, output:Output, mode:OutputMode):Void 
+	private static function _printBytesWithInfo(info:TypeInformation<Dynamic>, data:Dynamic, output:Output, mode:OutputMode):OutputMode 
 	{
-		switch(info) {
-            case TypeInformation.PRIMITIVE(nullable, type)            : printPrimitive(type, data);
-            case TypeInformation.STRING                               : mode = printString(data, output, mode); 
-            case TypeInformation.ENUM(_, constractors)                : mode = printEnum(constractors, data, output, mode);
-            case TypeInformation.CLASS(_, fields) | ANONYMOUS(fields) : mode = printClassInstance(fields, data, output, mode);
-            case TypeInformation.MAP(STRING, value)                   : mode = printStringMap(value, output, mode);
-            case TypeInformation.MAP(INT, value)                      : mode = printIntMap(value, output, mode);
-            case TypeInformation.COLLECTION(elementType, type)        : mode = printCollection(elementType, type, data, output, mode);
-            case TypeInformation.ABSTRACT(type)                       : mode = printAbstract(type, data, output, mode);
+		switch (info) {
+            case TypeInformation.PRIMITIVE(nullable, type)                                    : printPrimitive(type, data, output);
+            case TypeInformation.STRING                                                       : mode = printString(data, output, mode); 
+            case TypeInformation.ENUM(_, _, constractors)                                     : mode = printEnum(constractors, data, output, mode);
+            case TypeInformation.CLASS(_, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = printClassInstance(fields, fieldNames, data, output, mode);
+            case TypeInformation.MAP(STRING, value)                                           : mode = printStringMap(value, data, output, mode);
+            case TypeInformation.MAP(INT, value)                                              : mode = printIntMap(value, data, output, mode);
+            case TypeInformation.COLLECTION(elementType, type)                                : mode = printCollection(elementType, type, data, output, mode);
+            case TypeInformation.ABSTRACT(type)                                               : mode = printAbstract(type, data, output, mode);
+            case TypeInformation.CLASS_TYPE                                                   : mode = printClassType(data, output, mode);
         }
 		return mode;
 	}
-    private static function printPrimitive(type:PrimitiveType, data:Dynamic, output:Output):Dynamic 
+	private static function printEnum(constructors:Map<Int, Array<String>>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		var index = Type.enumIndex(data);
+		var parameters = Type.enumParameters(data);
+		var parameterTypes = constructors[index];
+		
+		output.writeUInt16(index);
+		for (i in 0...parameterTypes.length)
+		{
+			mode = _printBytesWithInfo(
+				TypePacker.resolveType(parameterTypes[i]), 
+				parameters[i], 
+				output, 
+				mode
+			);
+		}
+		return mode;
+	}
+	private static function printClassInstance(fields:Map<String, String>, fieldNames:Array<String>, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		for (name in fieldNames)
+		{
+			mode = _printBytesWithInfo(
+				TypePacker.resolveType(fields[name]), 
+				Reflect.field(data, name), 
+				output, 
+				mode
+			);
+		}
+		return mode;
+	}
+	private static function printStringMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		var map:StringMap<Dynamic> = data;
+		var typeInfo = TypePacker.resolveType(type);
+		var size = 0;
+		for (key in map.keys()) size += 1;
+		output.writeUInt16(size);
+		for (key in map.keys()) 
+		{
+			mode = printString(key, output, mode);
+			mode = _printBytesWithInfo(
+				typeInfo,
+				map.get(key), 
+				output, 
+				mode
+			);
+		}
+		return mode;
+	}
+	private static function printIntMap(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		var map:IntMap<Dynamic> = data;
+		var typeInfo = TypePacker.resolveType(type);
+		var size = 0;
+		for (key in map.keys()) size += 1;
+		output.writeUInt16(size);
+		for (key in map.keys()) 
+		{
+			output.writeInt32(key);
+			mode = _printBytesWithInfo(
+				typeInfo,
+				map.get(key), 
+				output, 
+				mode
+			);
+		}
+		return mode;
+	}
+	private static function printCollection(elementType:String, type:CollectionType, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		var typeInfo = TypePacker.resolveType(elementType);
+		switch (type)
+		{
+			case CollectionType.ARRAY:
+				var arr:Array<Dynamic> = data;
+				output.writeUInt16(arr.length);
+				for (element in arr) {
+					mode = _printBytesWithInfo(
+						typeInfo,
+						element, 
+						output, 
+						mode
+					);
+				}
+			case CollectionType.LIST:
+				var arr:List<Dynamic> = data;
+				output.writeUInt16(arr.length);
+				for (element in arr) {
+					mode = _printBytesWithInfo(
+						typeInfo,
+						element, 
+						output, 
+						mode
+					);
+				}
+			case CollectionType.VECTOR:
+				var arr:Vector<Dynamic> = data;
+				output.writeUInt16(arr.length);
+				for (element in arr) {
+					mode = _printBytesWithInfo(
+						typeInfo,
+						element, 
+						output, 
+						mode
+					);
+				}
+		}
+		return mode;
+	}
+	private static function printAbstract(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		return _printBytesWithInfo(
+			TypePacker.resolveType(type), 
+			data, 
+			output, 
+			mode
+		);
+	}
+	private static function printClassType(data:Dynamic, output:Output, mode:OutputMode):OutputMode
+	{
+		return printString(Type.getClassName(data), output, mode);
+	}
+    private static function printPrimitive(type:PrimitiveType, data:Dynamic, output:Output):Void 
 	{
         switch (type) {
             case PrimitiveType.INT   : output.writeInt32(data);
@@ -41,7 +168,7 @@ class BytesPrinter
     }
 	private static function printString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
-		return switch (mode)
+		switch (mode)
 		{
 			#if flash
 			case OutputMode.Bytes:
@@ -77,8 +204,9 @@ class BytesPrinter
 				} else {
 					OutputMode.Any;
 				}
-				_printString(data, output, mode);
+				printString(data, output, mode);
 		}
+		return mode;
 	}
 	private static function printBytes(data:Dynamic, output:Output):Void
 	{
