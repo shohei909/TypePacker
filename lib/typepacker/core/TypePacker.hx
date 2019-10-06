@@ -147,6 +147,8 @@ class TypePacker
 				TypeInformation.CLASS_TYPE;
 			case TAbstract(ref, [element]) if (ref.toString() == "Enum"):
 				TypeInformation.ENUM_TYPE;
+			case TInst(_.toString() => "haxe.io.Bytes", []):
+				TypeInformation.BYTES;
 				
             case TEnum(ref, params):
                 

@@ -1,5 +1,8 @@
 package typepacker.core;
+import haxe.crypto.Base64;
+import haxe.crypto.BaseCode;
 import haxe.ds.Vector;
+import haxe.io.Bytes;
 import haxe.macro.Expr;
 import typepacker.core.TypeInformation.CollectionType;
 import typepacker.core.TypeInformation.MapKeyType;
@@ -11,7 +14,8 @@ import typepacker.core.TypeInformation.PrimitiveType;
  */
 class DataSimplifier {
     var setting:PackerSetting;
-
+	private static var base64:BaseCode;
+	
     public function new(setting:PackerSetting) {
         this.setting = setting;
     }
@@ -24,7 +28,6 @@ class DataSimplifier {
                 } else {
                     simplifyPrimitive(type, data);
                 }
-
             case TypeInformation.STRING :
                 if (data == null) {
                     data;
@@ -49,6 +52,8 @@ class DataSimplifier {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Enum<T>");
                 }
+            case TypeInformation.BYTES:
+				(simplifyBytes(data) : Dynamic);
             case TypeInformation.ENUM(_, _, keys, constractors):
                 (simplifyEnum(keys, constractors, data) : Dynamic);
             case TypeInformation.CLASS(_, _, fields, _) | ANONYMOUS(fields, _) :
@@ -80,7 +85,20 @@ class DataSimplifier {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be " + t);
         }
     }
-
+    private function simplifyBytes(data:Dynamic):Dynamic {
+		return if (data == null) {
+			data;
+		} else if (Std.is(data, Bytes)) {
+			if (setting.bytesToBase64) {
+				if (base64 == null) base64 = new BaseCode(Base64.BYTES);
+				base64.encodeBytes(data).toString();
+			} else {
+				data;
+			}
+		} else {
+			throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes");
+		}
+    }
     private function simplifyAbstract(typeString:String, data:Dynamic) {
         if (data == null) return null;
         var type = TypePacker.resolveType(typeString);

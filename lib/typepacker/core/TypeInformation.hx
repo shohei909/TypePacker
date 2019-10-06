@@ -13,6 +13,7 @@ enum TypeInformation<T>
     STRING;
 	CLASS_TYPE;
 	ENUM_TYPE;
+	BYTES;
 }
 
 @:enum abstract MapKeyType(Int) from Int {

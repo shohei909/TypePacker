@@ -5,6 +5,7 @@ import haxe.ds.Vector;
 class PackerSetting {
 	public var forceNullable = false;
 	public var useEnumIndex = false;
+	public var bytesToBase64 = true;
 	
     public function new () {}
 }

@@ -27,6 +27,7 @@ class BytesUnserialzer
 	public function unserializeWithInfo<T>(info:TypeInformation<T>, input:Input):T {
         return switch (info) {
             case TypeInformation.PRIMITIVE(nullable, type)               : unserializePrimitive(nullable, type, input);
+			case TypeInformation.BYTES                                   : unserializeBytes(input);
             case TypeInformation.STRING                                  : unserializeString(input); 
             case TypeInformation.ENUM(name, _enum, keys, constractors)   : unserializeEnum(name, _enum, keys, constractors, input);
             case TypeInformation.CLASS(name, _class, fields, fieldNames) : unserializeClassInstance(name, _class, fields, fieldNames, input);
@@ -53,6 +54,15 @@ class BytesUnserialzer
             case PrimitiveType.FLOAT : unserializeDouble(input);
         }
     }
+	private function unserializeBytes(input:Input):Dynamic
+	{
+		var byte = input.readByte();
+		if (byte == 0xFF) {
+			return null;
+		}
+		var length = unserializeInt32(input);
+		return input.read(length);
+	}
 	private function unserializeString(input:Input):Dynamic
 	{
 		var byte = input.readByte();

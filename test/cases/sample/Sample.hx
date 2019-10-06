@@ -1,5 +1,6 @@
 package cases.sample;
 import haxe.ds.Vector;
+import haxe.io.Bytes;
 
 class SampleClass
 {
@@ -7,6 +8,7 @@ class SampleClass
     public var e:SampleEnum;
     public var i:Int;
     public var str:String;
+    public var bytes:Bytes;
     public var stringMap:Map<String, Int>;
     public var intMap:Map<Int, List<Int>>;
 
@@ -20,6 +22,7 @@ class SampleClass
             "test" => 100,
             "test2" => 101,
         ];
+		bytes = Bytes.ofHex("0105");
     }
 }
 

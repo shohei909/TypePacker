@@ -37,6 +37,7 @@ class BytesSerializer
 	{
 		switch (info) {
             case TypeInformation.PRIMITIVE(nullable, type)                                       : serializePrimitive(nullable, type, data, output);
+            case TypeInformation.BYTES                                                           : serializeBytes(data, output);
             case TypeInformation.STRING                                                          : mode = serializeString(data, output, mode); 
             case TypeInformation.ENUM(_, _, keys, constractors)                                  : mode = serializeEnum(keys, constractors, data, output, mode);
             case TypeInformation.CLASS(_, _, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = serializeClassInstance(fields, fieldNames, data, output, mode);
@@ -66,6 +67,19 @@ class BytesSerializer
             case PrimitiveType.FLOAT : serializeDouble(data, output);
         }
     }
+	private function serializeBytes(data:Dynamic, output:Output):Void
+	{
+		if (data == null) {
+			output.writeByte(0xFF);
+			return;
+		} else {
+			output.writeByte(0);
+		}
+		var bytes:Bytes = data;
+		var length = bytes.length;
+		serializeInt32(length, output);
+		output.writeBytes(bytes, 0, length);
+	}
 	private function serializeString(data:Dynamic, output:Output, mode:OutputMode):OutputMode
 	{
 		if (data == null) {

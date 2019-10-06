@@ -101,14 +101,14 @@ class BytesPackerTestCase extends BaseTestCase
 	}
     public function testUnserialize():Void
 	{
-		assertEquals(1    , BytesPack.unserialize("Int"       , Bytes.ofHex("01000000")));
+		assertEquals(1    , BytesPack.unserialize("Int"       , Bytes.ofHex("01000000"        )));
 		assertEquals(0.7  , BytesPack.unserialize("Float"     , Bytes.ofHex("666666666666e63f")));
-		assertEquals(true , BytesPack.unserialize("Bool"      , Bytes.ofHex("01"      )));
-		assertEquals(false, BytesPack.unserialize("Null<Bool>", Bytes.ofHex("0000"    )));
-		assertEquals(null , BytesPack.unserialize("Null<Bool>", Bytes.ofHex("ff"      )));
-		assertEquals(null , BytesPack.unserialize("Null<Int>" , Bytes.ofHex("ff"      )));
-		assertEquals(null , BytesPack.unserialize("String"    , Bytes.ofHex("ff"      )));
-		assertEquals(null , BytesPack.unserialize("Array<Int>", Bytes.ofHex("ff"      )));
+		assertEquals(true , BytesPack.unserialize("Bool"      , Bytes.ofHex("01"              )));
+		assertEquals(false, BytesPack.unserialize("Null<Bool>", Bytes.ofHex("0000"            )));
+		assertEquals(null , BytesPack.unserialize("Null<Bool>", Bytes.ofHex("ff"              )));
+		assertEquals(null , BytesPack.unserialize("Null<Int>" , Bytes.ofHex("ff"              )));
+		assertEquals(null , BytesPack.unserialize("String"    , Bytes.ofHex("ff"              )));
+		assertEquals(null , BytesPack.unserialize("Array<Int>", Bytes.ofHex("ff"              )));
 		assertArrayEquals([0xFDEC], BytesPack.unserialize("Array<Int>", Bytes.ofHex("000100ecfd0000")));
 	}
 	

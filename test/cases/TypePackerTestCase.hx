@@ -43,12 +43,13 @@ class TypePackerTestCase extends BaseTestCase
                         "e" => "cases.sample.SampleEnum",
                         "i" => "Int",
                         "str" => "String",
+						"bytes" => "haxe.io.Bytes",
                         "intMap" => "Map<Int, List<Int>>",
                         "stringMap" => "Map<String, Int>",
                     ],
                     types
                 );
-				assertArrayEquals(["c","e","i","str","stringMap","intMap"], names);
+				assertArrayEquals(["c","e","i","str", "bytes", "stringMap","intMap"], names);
             default:
                 fail("must be CLASS");
         };
@@ -73,6 +74,7 @@ class TypePackerTestCase extends BaseTestCase
                         "e2" => "cases.sample.SampleGenericEnum<Null<Int>>",
                         "i" => "Int",
                         "str" => "String",
+                        "bytes" => "haxe.io.Bytes",
                         "c2" => "cases.sample.SampleClass",
                         "abst" => "cases.sample.SampleAbstract",
                         "f" => "Float",
@@ -82,7 +84,7 @@ class TypePackerTestCase extends BaseTestCase
                     ],
                     types
                 );
-				assertArrayEquals(["c","e","i","str","stringMap","intMap","c2","abst","f","arr","e2"], names);
+				assertArrayEquals(["c","e","i","str","bytes","stringMap","intMap","c2","abst","f","arr","e2"], names);
             default:
                 fail("must be CLASS");
         };
