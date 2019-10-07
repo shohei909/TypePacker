@@ -97,21 +97,21 @@ class TypePacker
         
         var t = type, prevT = null;
         var nullable = false;
-		registered[name] = null;
+        registered[name] = null;
         
         do {
             if (isNullType(t)) {
                 nullable = true;
             }
-			switch (t) 
-			{
-				case TAbstract(_.toString() => "Null", [element]): 
-					t = element;
-					nullable = true;
-				case _:
-			}
-			
-			prevT = t;
+            switch (t) 
+            {
+                case TAbstract(_.toString() => "Null", [element]): 
+                    t = element;
+                    nullable = true;
+                case _:
+            }
+            
+            prevT = t;
             t = Context.follow(t, true);
         } while (getTypeName(prevT) != getTypeName(t));
         
@@ -142,22 +142,22 @@ class TypePacker
 
             case TAbstract(_.toString() => "Int", []) :
                 TypeInformation.PRIMITIVE(nullable, INT);
-				
-			case TAbstract(ref, [element]) if (ref.toString() == "Class"):
-				TypeInformation.CLASS_TYPE;
-			case TAbstract(ref, [element]) if (ref.toString() == "Enum"):
-				TypeInformation.ENUM_TYPE;
-			case TInst(_.toString() => "haxe.io.Bytes", []):
-				TypeInformation.BYTES;
-				
+                
+            case TAbstract(ref, [element]) if (ref.toString() == "Class"):
+                TypeInformation.CLASS_TYPE;
+            case TAbstract(ref, [element]) if (ref.toString() == "Enum"):
+                TypeInformation.ENUM_TYPE;
+            case TInst(_.toString() => "haxe.io.Bytes", []):
+                TypeInformation.BYTES;
+                
             case TEnum(ref, params):
                 
                 var e = ref.get();
                 var map = new Map<Int, Array<String>>();
-				var keys = new Map<String, Int>();
+                var keys = new Map<String, Int>();
                 var childParamsMap = mapTypeParams(e.params, params);
-				
-				var index = 0;
+                
+                var index = 0;
                 for (key in e.names) {
                     var c = e.constructs.get(key);
                     var arr = [];
@@ -173,8 +173,8 @@ class TypePacker
                             Context.error(name + " has unsupported constractor: " + c.type, Context.currentPos());
                     }
                     map[index] = arr;
-					keys[key] = index;
-					index += 1;
+                    keys[key] = index;
+                    index += 1;
                 }
                 TypeInformation.ENUM(ref.toString(), null, keys, map);
 
@@ -187,13 +187,13 @@ class TypePacker
                 
                 var className = struct.name;
                 var map = new Map();
-				var fieldNames = [];
+                var fieldNames = [];
                 var childParamsMap = null;
 
                 while (true) {
                     childParamsMap = mapTypeParams(struct.params, params, childParamsMap);
-					var classFields = struct.fields.get();
-					classFields.reverse();
+                    var classFields = struct.fields.get();
+                    classFields.reverse();
                     mapFields(classFields, childParamsMap, map, fieldNames);
 
                     var superClass = struct.superClass;
@@ -206,14 +206,14 @@ class TypePacker
                         params.push(if (childParamsMap.exists(name)) childParamsMap[name] else p);
                     }
                 }
-				fieldNames.reverse();
+                fieldNames.reverse();
                 TypeInformation.CLASS(ref.toString(), null, map, fieldNames);
 
             case TAnonymous(ref):
                 var struct = ref.get();
                 var map = new Map();
-				var fieldNames = [];
-				mapFields(struct.fields, null, map, fieldNames);
+                var fieldNames = [];
+                mapFields(struct.fields, null, map, fieldNames);
 
                 TypeInformation.ANONYMOUS(map, fieldNames);
 
@@ -276,73 +276,73 @@ class TypePacker
             var type = f.type;
             
             map[f.name] = _registerType(type, typeParams);
-			fieldNames.push(f.name);
+            fieldNames.push(f.name);
         }
     }
-	
-	private static var defined:Bool = false;
-	private static function onAfterTyping(types:Array<haxe.macro.Type.ModuleType>):Void
-	{
-		if (defined) return;
-		defined = true;
-		// see https://github.com/HaxeFoundation/haxe/issues/6254#issuecomment-502017733
-		var expr = makeExpr(registered);
-		var type = macro class TypePackerResource2 {
-			@:keep public static var registered:Map<String, Dynamic> = $expr;
-		};
-		type.meta.push({name:"@:keep", pos:Context.currentPos()});
-		Context.defineType(type);
-		Compiler.exclude("TypePackerResource");
-	}
-	
-	private static function makeExpr(value:Dynamic):Expr
-	{
-		return if (Std.is(value, IntMap) || Std.is(value, StringMap))
-		{
-			var mapExpr:Array<Expr> = [];
-			for (key in (value.keys(): Iterator<Int>))
-			{
-				mapExpr.push(macro $v{key} => ${makeExpr(value.get(key))});
-			}
-			if (mapExpr.length == 0) macro new Map() else macro $a{mapExpr};
-		} 
-		else if (Reflect.isEnumValue(value))
-		{
-			var typeNameString = Type.getEnumName(Type.getEnum(value));
-			var typeName = typeNameString.split(".");
-			var name = EnumValueTools.getName(value);
-			var params = EnumValueTools.getParameters(value);
-			if (params.length == 0)
-			{
-				macro $p{typeName}.$name;
-			}
-			else
-			{
-				var paramExprs = [for (param in params) makeExpr(param)];
-				if (typeNameString == "typepacker.core.TypeInformation")
-				{
-					if (name == "CLASS")
-					{
-						paramExprs[1] = macro Type.resolveClass($v{params[0]});
-					}
-					else if (name == "ENUM")
-					{
-						paramExprs[1] = macro Type.resolveEnum($v{params[0]});
-					}
-				}
-				macro $p{typeName}.$name($a{paramExprs});
-			}
-		}
-		else
-		{
-			Context.makeExpr(value, Context.currentPos());
-		}
-	}
+    
+    private static var defined:Bool = false;
+    private static function onAfterTyping(types:Array<haxe.macro.Type.ModuleType>):Void
+    {
+        if (defined) return;
+        defined = true;
+        // see https://github.com/HaxeFoundation/haxe/issues/6254#issuecomment-502017733
+        var expr = makeExpr(registered);
+        var type = macro class TypePackerResource2 {
+            @:keep public static var registered:Map<String, Dynamic> = $expr;
+        };
+        type.meta.push({name:"@:keep", pos:Context.currentPos()});
+        Context.defineType(type);
+        Compiler.exclude("TypePackerResource");
+    }
+    
+    private static function makeExpr(value:Dynamic):Expr
+    {
+        return if (Std.is(value, IntMap) || Std.is(value, StringMap))
+        {
+            var mapExpr:Array<Expr> = [];
+            for (key in (value.keys(): Iterator<Int>))
+            {
+                mapExpr.push(macro $v{key} => ${makeExpr(value.get(key))});
+            }
+            if (mapExpr.length == 0) macro new Map() else macro $a{mapExpr};
+        } 
+        else if (Reflect.isEnumValue(value))
+        {
+            var typeNameString = Type.getEnumName(Type.getEnum(value));
+            var typeName = typeNameString.split(".");
+            var name = EnumValueTools.getName(value);
+            var params = EnumValueTools.getParameters(value);
+            if (params.length == 0)
+            {
+                macro $p{typeName}.$name;
+            }
+            else
+            {
+                var paramExprs = [for (param in params) makeExpr(param)];
+                if (typeNameString == "typepacker.core.TypeInformation")
+                {
+                    if (name == "CLASS")
+                    {
+                        paramExprs[1] = macro Type.resolveClass($v{params[0]});
+                    }
+                    else if (name == "ENUM")
+                    {
+                        paramExprs[1] = macro Type.resolveEnum($v{params[0]});
+                    }
+                }
+                macro $p{typeName}.$name($a{paramExprs});
+            }
+        }
+        else
+        {
+            Context.makeExpr(value, Context.currentPos());
+        }
+    }
     #end
-	
-	public macro static function build():Array<Field>
-	{
-		Context.onAfterTyping(onAfterTyping);
-		return null;
-	}
+    
+    public macro static function build():Array<Field>
+    {
+        Context.onAfterTyping(onAfterTyping);
+        return null;
+    }
 }

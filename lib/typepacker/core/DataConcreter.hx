@@ -13,8 +13,8 @@ import typepacker.core.TypeInformation;
  */
 class DataConcreter {
     var setting:PackerSetting;
-	private static var base64:BaseCode;
-	
+    private static var base64:BaseCode;
+    
     public function new(setting:PackerSetting) {
         this.setting = setting;
     }
@@ -52,7 +52,7 @@ class DataConcreter {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be ENUM<T>");
                 }
             case TypeInformation.BYTES:
-				(concreteBytes(data) : Dynamic);
+                (concreteBytes(data) : Dynamic);
             case TypeInformation.ENUM(name, _enum, keys, constractors):
                 (concreteEnum(name, _enum, keys, constractors, data) : Dynamic);
             case TypeInformation.CLASS(name, _class, fields, _) :
@@ -92,22 +92,22 @@ class DataConcreter {
         }
     }
     private function concreteBytes(data:Dynamic):Dynamic {
-		return if (data == null) {
-			null;
-		} else if (Std.is(data, Bytes)) {
-			data;
-		} else {
-			if (setting.bytesToBase64) {
-				if (Std.is(data, String)) {
-					if (base64 == null) base64 = new BaseCode(Base64.BYTES);
-					base64.decodeBytes(Bytes.ofString(data));
-				} else {
-					throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes or String");
-				}
-			} else {
-				throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes");
-			}
-		}
+        return if (data == null) {
+            null;
+        } else if (Std.is(data, Bytes)) {
+            data;
+        } else {
+            if (setting.bytesToBase64) {
+                if (Std.is(data, String)) {
+                    if (base64 == null) base64 = new BaseCode(Base64.BYTES);
+                    base64.decodeBytes(Bytes.ofString(data));
+                } else {
+                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes or String");
+                }
+            } else {
+                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes");
+            }
+        }
     }
     private function concreteAbstract(typeString:String, data:Dynamic) {
         if (data == null) return null;

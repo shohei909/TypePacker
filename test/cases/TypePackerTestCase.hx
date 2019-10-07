@@ -25,10 +25,10 @@ class TypePackerTestCase extends BaseTestCase
                     ],
                     types
                 );
-				assertArrayEquals(
-					["key", "value", "meta"],
-					names
-				);
+                assertArrayEquals(
+                    ["key", "value", "meta"],
+                    names
+                );
                 assertNotEquals(null, Type.resolveClass("cases.sample.SampleStringValue"));
 
             default:
@@ -43,28 +43,28 @@ class TypePackerTestCase extends BaseTestCase
                         "e" => "cases.sample.SampleEnum",
                         "i" => "Int",
                         "str" => "String",
-						"bytes" => "haxe.io.Bytes",
+                        "bytes" => "haxe.io.Bytes",
                         "intMap" => "Map<Int, List<Int>>",
                         "stringMap" => "Map<String, Int>",
                     ],
                     types
                 );
-				assertArrayEquals(["c","e","i","str", "bytes", "stringMap","intMap"], names);
+                assertArrayEquals(["c","e","i","str", "bytes", "stringMap","intMap"], names);
             default:
                 fail("must be CLASS");
         };
         switch (TypePacker.toTypeInformation("Class<SamplePair>")) {
             case TypeInformation.CLASS_TYPE:
-				
-			default:
+                
+            default:
                 fail("must be CLASS TYPE");
-		}
+        }
         switch (TypePacker.toTypeInformation("Enum<SampleEnum>")) {
             case TypeInformation.ENUM_TYPE:
-				
-			case type:
+                
+            case type:
                 fail("must be ENUM TYPE:" + type);
-		}
+        }
         switch (TypePacker.resolveType("cases.sample._Sample.SamplePrivateClass")) {
             case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names):
                 assertMapEquals(
@@ -84,7 +84,7 @@ class TypePackerTestCase extends BaseTestCase
                     ],
                     types
                 );
-				assertArrayEquals(["c","e","i","str","bytes","stringMap","intMap","c2","abst","f","arr","e2"], names);
+                assertArrayEquals(["c","e","i","str","bytes","stringMap","intMap","c2","abst","f","arr","e2"], names);
             default:
                 fail("must be CLASS");
         };
@@ -98,8 +98,8 @@ class TypePackerTestCase extends BaseTestCase
                         "cases.sample.SampleClass",
                     ]
                 );
-				assertEquals(0, keys["LINK"]);
-				assertEquals(1, keys["NONE"]);
+                assertEquals(0, keys["LINK"]);
+                assertEquals(1, keys["NONE"]);
                 assertArrayEquals(constructors[keys["NONE"]], []);
                 assertFalse(keys.exists("NON_pack"));
                 assertFalse(keys.exists("NON_pack_F"));
@@ -116,7 +116,7 @@ class TypePackerTestCase extends BaseTestCase
                         "Null<Int>",
                     ]
                 );
-				assertEquals(0, keys["TEST"]);
+                assertEquals(0, keys["TEST"]);
 
             default:
                 fail("must be ENUM");

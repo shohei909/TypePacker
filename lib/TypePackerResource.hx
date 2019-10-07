@@ -4,5 +4,5 @@ package;
 @:build(typepacker.core.TypePacker.build())
 class TypePackerResource
 {
-	public static var registered:Map<String, Dynamic> = null;
+    public static var registered:Map<String, Dynamic> = null;
 }

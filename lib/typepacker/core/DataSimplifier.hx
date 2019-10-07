@@ -14,8 +14,8 @@ import typepacker.core.TypeInformation.PrimitiveType;
  */
 class DataSimplifier {
     var setting:PackerSetting;
-	private static var base64:BaseCode;
-	
+    private static var base64:BaseCode;
+    
     public function new(setting:PackerSetting) {
         this.setting = setting;
     }
@@ -36,7 +36,7 @@ class DataSimplifier {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
                 }
-			case TypeInformation.CLASS_TYPE:
+            case TypeInformation.CLASS_TYPE:
                 if (data == null) {
                     null;
                 } else if (Std.is(data, Class)) {
@@ -44,7 +44,7 @@ class DataSimplifier {
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
                 }
-			case TypeInformation.ENUM_TYPE:
+            case TypeInformation.ENUM_TYPE:
                 if (data == null) {
                     null;
                 } else if (Std.is(data, Enum)) {
@@ -53,7 +53,7 @@ class DataSimplifier {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Enum<T>");
                 }
             case TypeInformation.BYTES:
-				(simplifyBytes(data) : Dynamic);
+                (simplifyBytes(data) : Dynamic);
             case TypeInformation.ENUM(_, _, keys, constractors):
                 (simplifyEnum(keys, constractors, data) : Dynamic);
             case TypeInformation.CLASS(_, _, fields, _) | ANONYMOUS(fields, _) :
@@ -86,18 +86,18 @@ class DataSimplifier {
         }
     }
     private function simplifyBytes(data:Dynamic):Dynamic {
-		return if (data == null) {
-			data;
-		} else if (Std.is(data, Bytes)) {
-			if (setting.bytesToBase64) {
-				if (base64 == null) base64 = new BaseCode(Base64.BYTES);
-				base64.encodeBytes(data).toString();
-			} else {
-				data;
-			}
-		} else {
-			throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes");
-		}
+        return if (data == null) {
+            data;
+        } else if (Std.is(data, Bytes)) {
+            if (setting.bytesToBase64) {
+                if (base64 == null) base64 = new BaseCode(Base64.BYTES);
+                base64.encodeBytes(data).toString();
+            } else {
+                data;
+            }
+        } else {
+            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes");
+        }
     }
     private function simplifyAbstract(typeString:String, data:Dynamic) {
         if (data == null) return null;
@@ -136,18 +136,18 @@ class DataSimplifier {
         }
 
         var result:Array<Dynamic> = [];
-		var index:Int;
-		if (setting.useEnumIndex)
-		{
-			index = Type.enumIndex(data);
-			result.push(index);
-		}
-		else
-		{
-			var c = Type.enumConstructor(data);
-			result.push(c);
-			index = keys[c];
-		}
+        var index:Int;
+        if (setting.useEnumIndex)
+        {
+            index = Type.enumIndex(data);
+            result.push(index);
+        }
+        else
+        {
+            var c = Type.enumConstructor(data);
+            result.push(c);
+            index = keys[c];
+        }
         var paramTypes = constractors[index];
         var params = Type.enumParameters(data);
 

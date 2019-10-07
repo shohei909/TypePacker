@@ -22,7 +22,7 @@ class Json {
     public static function set_defaultPacker(packer:JsonPacker) {
         return _defaultPacker = packer;
     }
-	
+    
     public static function printWithInfo<T>(info:TypeInformation<T>, data:T):String {
         return defaultPacker.printWithInfo(info, data);
     }

@@ -11,9 +11,9 @@ enum TypeInformation<T>
     COLLECTION(elementType:String, type:CollectionType);
     PRIMITIVE(nullable:Bool, type:PrimitiveType);
     STRING;
-	CLASS_TYPE;
-	ENUM_TYPE;
-	BYTES;
+    CLASS_TYPE;
+    ENUM_TYPE;
+    BYTES;
 }
 
 @:enum abstract MapKeyType(Int) from Int {

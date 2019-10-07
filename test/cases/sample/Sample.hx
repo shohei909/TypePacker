@@ -22,7 +22,7 @@ class SampleClass
             "test" => 100,
             "test2" => 101,
         ];
-		bytes = Bytes.ofHex("0105");
+        bytes = Bytes.ofHex("0105");
     }
 }
 

@@ -37,17 +37,17 @@ class BytesPack
     macro public static function serialize(type:String, data:Expr) {
         var info = TypePacker.toTypeInformation(type);
         return macro {
-			var output = new haxe.io.BytesOutput();
-			typepacker.bytes.BytesPack.serializeWithInfo($info, $data, output);
-			output.getBytes();
-		}
+            var output = new haxe.io.BytesOutput();
+            typepacker.bytes.BytesPack.serializeWithInfo($info, $data, output);
+            output.getBytes();
+        }
     }
 
     macro public static function unserialize(type:String, data:Expr) {
         var info = TypePacker.toTypeInformation(type);
         return macro {
-			var input = new haxe.io.BytesInput($data);
-			typepacker.bytes.BytesPack.unserializeWithInfo($info, input);
-		}
+            var input = new haxe.io.BytesInput($data);
+            typepacker.bytes.BytesPack.unserializeWithInfo($info, input);
+        }
     }
 }
