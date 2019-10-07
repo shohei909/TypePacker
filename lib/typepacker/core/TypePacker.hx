@@ -30,8 +30,10 @@ class TypePacker
     }
 
     #if !macro
+	public static var defaultResource:TypePackerResource;
     public static function resolveType<T>(name:String):TypeInformation<T> {
-        return TypePackerResource.registered[name];
+		if (defaultResource == null) defaultResource = new TypePackerResource();
+        return defaultResource.registered[name];
     }
     #else
     public static var registered:Map<String, Dynamic> = new Map();
@@ -288,7 +290,8 @@ class TypePacker
         // see https://github.com/HaxeFoundation/haxe/issues/6254#issuecomment-502017733
         var expr = makeExpr(registered);
         var type = macro class TypePackerResource2 {
-            @:keep public static var registered:Map<String, Dynamic> = $expr;
+            @:keep public var registered:Map<String, Dynamic> = $expr;
+			@:keep public function new() {}
         };
         type.meta.push({name:"@:keep", pos:Context.currentPos()});
         Context.defineType(type);
