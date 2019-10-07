@@ -19,15 +19,15 @@ class BytesPacker
 {
     #if !macro
     public var setting(default, null):PackerSetting;
-	public var serializer(default, null):BytesSerializer;
-	public var unserializer(default, null):BytesUnserialzer;
-	
+    public var serializer(default, null):BytesSerializer;
+    public var unserializer(default, null):BytesUnserialzer;
+    
     public function new(?setting:PackerSetting) {
-		if (setting == null)
-		{
-			setting = new PackerSetting();
-			setting.useEnumIndex = true;
-		}
+        if (setting == null)
+        {
+            setting = new PackerSetting();
+            setting.useEnumIndex = true;
+        }
         this.setting = setting;
         this.serializer = new BytesSerializer(setting);
         this.unserializer = new BytesUnserialzer(setting);
@@ -39,6 +39,6 @@ class BytesPacker
     public function unserializeWithInfo<T>(info:TypeInformation<T>, input:Input):T {
         return unserializer.unserializeWithInfo(info, input);
     }
-	#end
-	
+    #end
+    
 }
