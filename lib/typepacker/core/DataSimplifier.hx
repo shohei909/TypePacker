@@ -131,7 +131,7 @@ class DataSimplifier {
 
     private function simplifyEnum(keys:Map<String, Int>, constractors:Map<Int,Array<String>>, data:Dynamic) {
         if (data == null) return null;
-        if (!Reflect.isEnumValue(data)) {
+        if (!setting.validates && !Reflect.isEnumValue(data)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be enum");
         }
 
