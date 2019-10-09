@@ -14,8 +14,9 @@ class TestMain
     {
         var runner = new NanoTestRunner();
         runner.add(new TypePackerTestCase());
-        runner.add(new JsonPackerTestCase(true));
-        runner.add(new JsonPackerTestCase(false));
+        runner.add(new JsonPackerTestCase(true, true));
+        runner.add(new JsonPackerTestCase(false, true));
+        runner.add(new JsonPackerTestCase(false, false));
         runner.add(new BytesPackerTestCase(true));
         runner.add(new BytesPackerTestCase(false));
 

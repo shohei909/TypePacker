@@ -15,10 +15,11 @@ import typepacker.json.JsonPacker;
 class JsonPackerTestCase extends BaseTestCase
 {
 
-    public function new(useEnumIndex:Bool)
+    public function new(useEnumIndex:Bool, validates:Bool)
     {
         super();
         Json.defaultPacker.setting.useEnumIndex = useEnumIndex;
+		Json.defaultPacker.setting.validates = validates;
     }
 
     public function testPrint() {
