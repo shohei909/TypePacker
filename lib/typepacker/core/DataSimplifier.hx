@@ -56,8 +56,8 @@ class DataSimplifier {
                 (simplifyBytes(data) : Dynamic);
             case TypeInformation.ENUM(_, _, keys, constractors):
                 (simplifyEnum(keys, constractors, data) : Dynamic);
-            case TypeInformation.CLASS(_, _, fields, _) | ANONYMOUS(fields, _) :
-                (simplifyClassInstance(fields, data) : Dynamic);
+            case TypeInformation.CLASS(_, _, fields, fieldNames) | ANONYMOUS(fields, fieldNames) :
+                (simplifyClassInstance(fields, fieldNames, data) : Dynamic);
             case TypeInformation.MAP(STRING, value) :
                 (simplifyStringMap(value, (data:Dynamic)) : Dynamic);
             case TypeInformation.MAP(INT, value) :
@@ -159,10 +159,10 @@ class DataSimplifier {
         return result;
     }
 
-    private function simplifyClassInstance(fields:Map<String,String>, data:Dynamic):Dynamic {
+    private function simplifyClassInstance(fields:Map<String,String>, fieldNames:Array<String>, data:Dynamic):Dynamic {
         if (data == null) return null;
         var result = {};
-        for (key in fields.keys()) {
+        for (key in fieldNames) {
             var type = TypePacker.resolveType(fields[key]);
             var f = if (!Reflect.hasField(data, key)) {
                 null;
