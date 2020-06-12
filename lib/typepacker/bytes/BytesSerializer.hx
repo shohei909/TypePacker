@@ -95,7 +95,7 @@ class BytesSerializer
         switch (mode)
         {
             #if flash
-            case OutputMode.Bytes:
+            case OutputMode.ByteArray:
                 var string:String = data;
                 var byteArray:flash.utils.ByteArray = untyped output.b;
                 byteArray.writeUTF(string);
@@ -115,7 +115,7 @@ class BytesSerializer
                 mode = 
                 #if flash
                 if (Std.is(output, BytesOutput)) {
-                    OutputMode.Bytes;
+                    OutputMode.ByteArray;
                 } else 
                 #end
                 if (Reflect.hasField(output, "__writeUTF")) {
