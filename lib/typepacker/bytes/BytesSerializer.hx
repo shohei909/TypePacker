@@ -1,4 +1,5 @@
 package typepacker.bytes;
+import haxe.ds.IntMap;
 import haxe.ds.StringMap;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
@@ -10,7 +11,6 @@ import typepacker.bytes.BytesSerializer.OutputMode;
 import typepacker.core.PackerSetting;
 import typepacker.core.TypeInformation;
 import typepacker.core.TypePacker;
-import yaml.util.IntMap;
 
 class BytesSerializer
 {
