@@ -3,6 +3,7 @@ package;
 import cases.sample.Sample.SampleAbstract;
 import cases.sample.Sample.SampleClass;
 import cases.sample.Sample.SampleEnum;
+import haxe.DynamicAccess;
 import haxe.ds.Vector;
 import haxe.PosInfos;
 import nanotest.NanoTestCase;
@@ -14,6 +15,21 @@ import typepacker.core.PackerBase;
  */
 class BaseTestCase extends NanoTestCase
 {
+    public function assertDynamicEquals<V>(expected:DynamicAccess<V>, actual:DynamicAccess<V>, ?p:PosInfos)
+    {
+        var ec = [for (i in expected) i].length;
+        var ac = [for (i in actual) i].length;
+
+        if (ec != ac) {
+            fail('expected length ${ec} but was ${ac}', p );
+        }
+
+        for (i in expected.keys()) {
+            if (expected[i] != actual[i]) {
+                fail('expected [$i] ${expected[i]} but was ${actual[i]}', p );
+            }
+        }
+    }
     public function assertMapEquals<K, V>(expected:Map<K, V>, actual:Map<K, V>, ?p:PosInfos)
     {
         var ec = [for (i in expected) i].length;

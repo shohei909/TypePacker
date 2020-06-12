@@ -38,6 +38,7 @@ class JsonPackerTestCase extends BaseTestCase
         }
         assertEquals("\"cases.sample.SampleClass\"", Json.print("Class<SampleClass>", SampleClass));
         assertEquals("\"cases.sample.SampleEnum\"", Json.print("Enum<SampleEnum>", SampleEnum));
+		assertEquals("{\"a\":[\"x\"]}", Json.print("haxe.DynamicAccess<Array<String>>", {a:["x"]}));
     }
 
     public function testParse() {
@@ -69,6 +70,7 @@ class JsonPackerTestCase extends BaseTestCase
         
         assertEquals((cases.sample.Sample.SampleClass:Dynamic), Json.parse("Class<SampleClass>", "\"cases.sample.SampleClass\""));
         assertEquals((cases.sample.Sample.SampleEnum:Dynamic), Json.parse("Enum<SampleClass>", "\"cases.sample.SampleEnum\""));
+		assertDynamicEquals({a:"x"}, Json.parse("haxe.DynamicAccess<String>", "{\"a\":\"x\"}"));
     }
 
     public function testPacker() {

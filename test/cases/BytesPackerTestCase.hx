@@ -79,6 +79,13 @@ class BytesPackerTestCase extends BaseTestCase
             var data1 = convert(TypePacker.toTypeInformation("SampleAbstract"), new SampleAbstract(SampleEnum.NONE));
             assertEquals("NONE", data1.name());
         }
+		var obj = {
+			a:21, 
+			"0":0, 
+			"-1": -1, 
+			//"あ":20, // fails on C#
+		};
+		assertDynamicEquals(obj, convert(TypePacker.toTypeInformation("haxe.DynamicAccess<Int>"), obj));
     }
     public function testSerialize():Void
     {
