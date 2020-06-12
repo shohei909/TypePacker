@@ -133,6 +133,9 @@ class TypePacker
             case TAbstract(_.toString() => #if(haxe_ver < 4) "Map" #else "haxe.ds.Map" #end, [TypeTools.followWithAbstracts(_) => (TAbstract(_.toString() => "Int", [])), element]):
                 TypeInformation.MAP(INT, _registerType(element, paramsMap));
 
+            case TAbstract(_.toString() => "haxe.DynamicAccess", [element]):
+                TypeInformation.DYNAMIC_ACCESS(_registerType(element, paramsMap));
+				
             case TInst(_.toString() => "String", []) :
                 TypeInformation.STRING;
 

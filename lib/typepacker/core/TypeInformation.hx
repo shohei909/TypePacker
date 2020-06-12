@@ -14,6 +14,7 @@ enum TypeInformation<T>
     CLASS_TYPE;
     ENUM_TYPE;
     BYTES;
+	DYNAMIC_ACCESS(elementType:String);
 }
 
 @:enum abstract MapKeyType(Int) from Int {

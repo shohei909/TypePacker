@@ -1,4 +1,5 @@
 package typepacker.core;
+import haxe.DynamicAccess;
 import haxe.crypto.Base64;
 import haxe.crypto.BaseCode;
 import haxe.ds.Vector;
@@ -63,6 +64,8 @@ class DataConcreter {
                 (concreteIntMap(value, data) : Dynamic);
             case TypeInformation.MAP(STRING, value) :
                 (concreteStringMap(value, data) : Dynamic);
+            case TypeInformation.DYNAMIC_ACCESS(value) :
+                (concreteDynamicAccess(value, data) : Dynamic);
             case TypeInformation.COLLECTION(element, ARRAY) :
                 (concreteArray(element, data) : Dynamic);
             case TypeInformation.COLLECTION(element, VECTOR) :
@@ -221,6 +224,18 @@ class DataConcreter {
         if (data == null) return null;
 
         var result:Map<String, Dynamic> = new Map();
+        var type = TypePacker.resolveType(valueType);
+
+        for (key in Reflect.fields(data)) {
+            result[key] = concrete(type, Reflect.field(data, key));
+        }
+
+        return result;
+    }
+    private function concreteDynamicAccess(valueType:String, data:Dynamic) {
+        if (data == null) return null;
+
+        var result:DynamicAccess<Dynamic> = {};
         var type = TypePacker.resolveType(valueType);
 
         for (key in Reflect.fields(data)) {

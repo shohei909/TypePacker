@@ -1,4 +1,5 @@
 package typepacker.bytes;
+import haxe.DynamicAccess;
 import haxe.ds.IntMap;
 import haxe.ds.List;
 import haxe.ds.StringMap;
@@ -34,6 +35,7 @@ class BytesUnserialzer
             case TypeInformation.ANONYMOUS(fields, fieldNames)           : unserializeAnonymous(fields, fieldNames, input);
             case TypeInformation.MAP(STRING, value)                      : unserializeStringMap(value, input);
             case TypeInformation.MAP(INT, value)                         : unserializeIntMap(value, input);
+			case TypeInformation.DYNAMIC_ACCESS(value)                   : unserializeDynamicAccess(value, input);
             case TypeInformation.COLLECTION(elementType, type)           : unserializeCollection(elementType, type, input);
             case TypeInformation.ABSTRACT(type)                          : unserializeAbstract(type, input);
             case TypeInformation.CLASS_TYPE                              : unserializeClassType(input);
@@ -169,6 +171,26 @@ class BytesUnserialzer
         for (i in 0...size) 
         {
             var key = unserializeInt32(input);
+            var value = unserializeWithInfo(
+                typeInfo,
+                input
+            );
+            map.set(key, value);
+        }
+        return map;
+    }
+    private function unserializeDynamicAccess(type:String, input:Input):Dynamic
+    {
+        var byte = input.readByte();
+        if (byte == 0xFF) {
+            return null;
+        }
+        var map:DynamicAccess<Dynamic> = {};
+        var typeInfo = TypePacker.resolveType(type);
+        var size = unserializeUInt16(input);
+        for (i in 0...size) 
+        {
+            var key = unserializeString(input);
             var value = unserializeWithInfo(
                 typeInfo,
                 input

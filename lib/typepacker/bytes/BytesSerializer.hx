@@ -1,4 +1,5 @@
 package typepacker.bytes;
+import haxe.DynamicAccess;
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
 import haxe.ds.Vector;
@@ -43,6 +44,7 @@ class BytesSerializer
             case TypeInformation.CLASS(_, _, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = serializeClassInstance(fields, fieldNames, data, output, mode);
             case TypeInformation.MAP(STRING, value)                                              : mode = serializeStringMap(value, data, output, mode);
             case TypeInformation.MAP(INT, value)                                                 : mode = serializeIntMap(value, data, output, mode);
+            case TypeInformation.DYNAMIC_ACCESS(value)                                           : mode = serializeDynamicAccess(value, data, output, mode);
             case TypeInformation.COLLECTION(elementType, type)                                   : mode = serializeCollection(elementType, type, data, output, mode);
             case TypeInformation.ABSTRACT(type)                                                  : mode = serializeAbstract(type, data, output, mode);
             case TypeInformation.CLASS_TYPE                                                      : mode = serializeClassType(data, output, mode);
@@ -222,6 +224,32 @@ class BytesSerializer
         for (key in map.keys()) 
         {
             serializeInt32(key, output);
+            mode = _serializeWithInfo(
+                typeInfo,
+                map.get(key), 
+                output, 
+                mode
+            );
+        }
+        return mode;
+    }
+    private function serializeDynamicAccess(type:String, data:Dynamic, output:Output, mode:OutputMode):OutputMode
+    {
+        if (data == null) {
+            output.writeByte(0xFF);
+            return mode;
+        } else {
+            output.writeByte(0);
+        }
+        var map:DynamicAccess<Dynamic> = data;
+        var typeInfo = TypePacker.resolveType(type);
+        var size = 0;
+        var keys = map.keys();
+		size += keys.length;
+        serializeUInt16(size, output);
+        for (key in keys) 
+        {
+            mode = serializeString(key, output, mode);
             mode = _serializeWithInfo(
                 typeInfo,
                 map.get(key), 

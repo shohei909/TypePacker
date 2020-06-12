@@ -1,4 +1,5 @@
 package typepacker.core;
+import haxe.DynamicAccess;
 import haxe.crypto.Base64;
 import haxe.crypto.BaseCode;
 import haxe.ds.Vector;
@@ -62,6 +63,8 @@ class DataSimplifier {
                 (simplifyStringMap(value, (data:Dynamic)) : Dynamic);
             case TypeInformation.MAP(INT, value) :
                 (simplifyIntMap(value, (data:Dynamic)) : Dynamic);
+            case TypeInformation.DYNAMIC_ACCESS(value) :
+                (simplifyDynamicAccess(value, (data:Dynamic)) : Dynamic);
             case TypeInformation.COLLECTION(elementType, type) :
                 (simplifyCollection(elementType, type, data) : Dynamic);
             case TypeInformation.ABSTRACT(type) :
@@ -206,6 +209,18 @@ class DataSimplifier {
             Reflect.setField(result, Std.string(key), value);
         }
 
+        return result;
+    }
+
+    private function simplifyDynamicAccess(valueType:String, data:DynamicAccess<Dynamic>):Dynamic {
+        if (data == null) return null;
+        var result = { };
+        var type = TypePacker.resolveType(valueType);
+
+        for (key in data.keys()) {
+            var value = simplify(type, data.get(key));
+            Reflect.setField(result, key, value);
+        }
         return result;
     }
 }
