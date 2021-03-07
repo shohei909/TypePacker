@@ -85,9 +85,9 @@ class BaseTestCase extends NanoTestCase
         }
 
         assertNotEquals(null, packer.parse("SampleClass", packer.print("SampleClass", new SampleClass())));
-        assertNotEquals(null, packer.parse("IntData", packer.print("IntData", { i : -12 })));
-		assertNotEquals(null, packer.parse("IntDataAlias", packer.print("IntData", { i : -12 })));
-		assertNotEquals(null, packer.parse("IntDataAlias", packer.print("IntDataAlias", { i : -12 })));
+        assertDynamicEquals({ i : -12 }, packer.parse("IntData"     , packer.print("IntData"     , { i : -12 })));
+		assertDynamicEquals({ i : -12 }, packer.parse("IntDataAlias", packer.print("IntData"     , { i : -12 })));
+		assertDynamicEquals({ i : -12 }, packer.parse("IntDataAlias", packer.print("IntDataAlias", { i : -12 })));
         assertNotEquals(null, packer.parse("IntData", packer.print("IntData", new SampleClass())));
 		assertEquals(SampleEnum.NONE, packer.parse("SampleEnum", packer.print("SampleAbstract", new SampleAbstract(SampleEnum.NONE))));
     }
