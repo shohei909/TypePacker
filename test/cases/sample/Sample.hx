@@ -34,6 +34,11 @@ enum SampleEnum {
     @:noPack NON_PACKED_F(i:Int);
 }
 
+enum SampleAliasEnum {
+    @:serializeAlias("a") AAA;
+    BBB;
+}
+
 typedef SampleStruct = {
     @:noPack public var c : SamplePrivateClass;
     public var e : SampleEnum;

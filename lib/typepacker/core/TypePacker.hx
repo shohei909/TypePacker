@@ -163,6 +163,7 @@ class TypePacker
                 var keys = new Map<String, Int>();
                 var childParamsMap = mapTypeParams(e.params, params);
                 
+				var aliasContext = new AliasContext();
                 var index = 0;
                 for (key in e.names) {
                     var c = e.constructs.get(key);
@@ -178,11 +179,12 @@ class TypePacker
                         default :
                             Context.error(name + " has unsupported constractor: " + c.type, Context.currentPos());
                     }
+					aliasContext.tryAddAlias(key, c.meta);
                     map[index] = arr;
                     keys[key] = index;
                     index += 1;
                 }
-                TypeInformation.ENUM(ref.toString(), null, keys, map);
+                TypeInformation.ENUM(ref.toString(), null, keys, map, aliasContext.nameToAlias, aliasContext.aliasToName);
 
             case TInst(ref, params) :
                 var struct = ref.get();
@@ -274,26 +276,7 @@ class TypePacker
         }
         for (f in fields) {
             if (f.meta.has(":noPack")) continue;
-			if (f.meta.has(":serializeAlias"))
-			{
-				for (meta in f.meta.extract(":serializeAlias"))
-				{
-					if (
-						meta.params != null &&
-						meta.params.length > 0
-					)
-					{
-						switch (meta.params[0].expr)
-						{
-							case ExprDef.EConst(Constant.CString(string, _)):
-								aliasContext.addAlias(f.name, string);
-								
-							case _:
-								throw ExprTools.toString(meta.params[0]) + " is unmatched parameter for @:serializeAlias";
-						}
-					}
-				}
-			}
+			aliasContext.tryAddAlias(f.name, f.meta);
 
             switch (f.kind) {
                 case FMethod(_):
@@ -376,15 +359,47 @@ class TypePacker
     }
 }
 
+#if macro
 class AliasContext
 {
+	public var aliasToName(default, null):Null<Map<String, String>>;
 	public var nameToAlias(default, null):Null<Map<String, String>>;
 	
 	public function new() {}
 	
-	public function addAlias(name:String, alias:String):Void
+	public function tryAddAlias(name:String, meta:haxe.macro.Type.MetaAccess):Void
+	{
+		if (meta.has(":serializeAlias"))
+		{
+			for (meta in meta.extract(":serializeAlias"))
+			{
+				if (
+					meta.params != null &&
+					meta.params.length > 0
+				)
+				{
+					switch (meta.params[0].expr)
+					{
+						case ExprDef.EConst(Constant.CString(string, _)):
+							this.addAlias(name, string);
+							
+						case _:
+							throw ExprTools.toString(meta.params[0]) + " is unmatched parameter for @:serializeAlias";
+					}
+				}
+			}
+		}
+	}		
+	private function addAlias(name:String, alias:String):Void
 	{
 		if (nameToAlias == null) nameToAlias = new Map();
-		nameToAlias[name] = alias;
+		if (aliasToName == null) aliasToName = new Map();
+		
+		if (aliasToName.exists(alias)) throw "duplicated alias " + alias + ":" + aliasToName[alias] + " and " + alias + ":" + name; 
+		if (nameToAlias.exists(name )) throw "multi alias is not allowed:" + nameToAlias[name] + ":" + name + " and " + alias + ":" + name;
+		
+		nameToAlias[name ] = alias;
+		aliasToName[alias] = name ;
 	}
 }
+#end

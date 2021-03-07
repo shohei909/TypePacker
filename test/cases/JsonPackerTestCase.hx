@@ -1,6 +1,7 @@
 package cases;
 import BaseTestCase;
 import cases.sample.Sample.SampleAbstract;
+import cases.sample.Sample.SampleAliasEnum;
 import cases.sample.Sample.SampleClass;
 import cases.sample.Sample.SampleEnum;
 import haxe.ds.Vector;
@@ -32,6 +33,8 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals("{\"i\":-12}", Json.print("IntData", { i : -12 } ));
         assertEquals("{\"i\":50}", Json.print("IntData", new SampleClass()));
         assertEquals("{\"x\":50}", Json.print("IntDataAlias", new SampleClass()));
+        assertEquals("[\"a\"]", Json.print("SampleAliasEnum", SampleAliasEnum.AAA));
+        assertEquals("[\"BBB\"]", Json.print("SampleAliasEnum", SampleAliasEnum.BBB));
 		
         if (Json.defaultPacker.setting.useEnumIndex) {
             assertEquals("[1]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
@@ -49,7 +52,11 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals(-2.1, Json.parse("Float", "-2.1"));
         assertEquals("\"", Json.parse("String", "\"\\\"\""));
         assertEquals(null, Json.parse("Empty", "null"));
-
+		assertEquals(SampleAliasEnum.AAA, Json.parse("SampleAliasEnum", "[\"a\"]"));
+		assertEquals(SampleAliasEnum.AAA, Json.parse("SampleAliasEnum", "[\"AAA\"]"));
+        assertEquals(SampleAliasEnum.BBB, Json.parse("SampleAliasEnum", "[\"BBB\"]"));
+		
+		
         assertTrue(Std.is(Json.parse("List<Int>", "[5]"), List));
         // assertEquals("5", Json.parse(StringVector, '["5"]')[0]);
 

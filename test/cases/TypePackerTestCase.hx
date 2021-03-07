@@ -106,7 +106,7 @@ class TypePackerTestCase extends BaseTestCase
         };
 
         switch (TypePacker.resolveType("cases.sample.SampleEnum")) {
-            case TypeInformation.ENUM("cases.sample.SampleEnum", _, keys, constructors):
+            case TypeInformation.ENUM("cases.sample.SampleEnum", _, keys, constructors, nameToAlias, aliasToName):
                 assertArrayEquals(
                     constructors[keys["LINK"]],
                     [
@@ -119,13 +119,15 @@ class TypePackerTestCase extends BaseTestCase
                 assertArrayEquals(constructors[keys["NONE"]], []);
                 assertFalse(keys.exists("NON_pack"));
                 assertFalse(keys.exists("NON_pack_F"));
+				assertEquals(null, nameToAlias);
+				assertEquals(null, aliasToName);
 
             default:
                 fail("must be ENUM");
         };
 
         switch (TypePacker.resolveType("cases.sample.SampleGenericEnum<Null<Int>>")) {
-            case TypeInformation.ENUM("cases.sample.SampleGenericEnum", _, keys, constructors):
+            case TypeInformation.ENUM("cases.sample.SampleGenericEnum", _, keys, constructors, nameToAlias, aliasToName):
                 assertArrayEquals(
                     constructors[keys["TEST"]],
                     [
@@ -133,6 +135,8 @@ class TypePackerTestCase extends BaseTestCase
                     ]
                 );
                 assertEquals(0, keys["TEST"]);
+				assertEquals(null, nameToAlias);
+				assertEquals(null, aliasToName);
 
             default:
                 fail("must be ENUM");

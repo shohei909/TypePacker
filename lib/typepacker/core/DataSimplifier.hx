@@ -55,8 +55,8 @@ class DataSimplifier {
                 }
             case TypeInformation.BYTES:
                 (simplifyBytes(data) : Dynamic);
-            case TypeInformation.ENUM(_, _, keys, constractors):
-                (simplifyEnum(keys, constractors, data) : Dynamic);
+            case TypeInformation.ENUM(_, _, keys, constractors, nameToAlias, aliasToName):
+                (simplifyEnum(keys, constractors, data, nameToAlias) : Dynamic);
             case TypeInformation.CLASS(_, _, fields, fieldNames, nameToAlias) | 
 			     TypeInformation.ANONYMOUS(fields, fieldNames, nameToAlias) :
                 (simplifyClassInstance(fields, fieldNames, data, nameToAlias) : Dynamic);
@@ -133,7 +133,7 @@ class DataSimplifier {
         return result;
     }
 
-    private function simplifyEnum(keys:Map<String, Int>, constractors:Map<Int,Array<String>>, data:Dynamic) {
+    private function simplifyEnum(keys:Map<String, Int>, constractors:Map<Int,Array<String>>, data:Dynamic, nameToAlias:Null<Map<String, String>>) {
         if (data == null) return null;
         if (setting.validates && !Reflect.isEnumValue(data)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be enum");
@@ -149,8 +149,12 @@ class DataSimplifier {
         else
         {
             var c = Type.enumConstructor(data);
+			index = keys[c];
+			if (nameToAlias != null && nameToAlias.exists(c)) 
+			{
+				c = nameToAlias[c];
+			}
             result.push(c);
-            index = keys[c];
         }
         var paramTypes = constractors[index];
         var params = Type.enumParameters(data);

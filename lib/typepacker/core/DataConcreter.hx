@@ -54,8 +54,8 @@ class DataConcreter {
                 }
             case TypeInformation.BYTES:
                 (concreteBytes(data) : Dynamic);
-            case TypeInformation.ENUM(name, _enum, keys, constractors):
-                (concreteEnum(name, _enum, keys, constractors, data) : Dynamic);
+            case TypeInformation.ENUM(name, _enum, keys, constractors, nameToAlias, aliasToName):
+                (concreteEnum(name, _enum, keys, constractors, data, aliasToName) : Dynamic);
             case TypeInformation.CLASS(name, _class, fields, _, nameToAlias) :
                 (concreteClass(name, _class, fields, data, nameToAlias) : Dynamic);
             case TypeInformation.ANONYMOUS(fields, _, nameToAlias) :
@@ -150,7 +150,7 @@ class DataConcreter {
         return Lambda.list(concreteArray(elementTypeString, data));
     }
 
-    private function concreteEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constractors:Map<Int, Array<String>>, data:Dynamic):EnumValue {
+    private function concreteEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constractors:Map<Int, Array<String>>, data:Dynamic, aliasToName:Null<Map<String, String>>):EnumValue {
         if (data == null) return null;
         if (_enum == null) _enum = Type.resolveEnum(name);
         if (!Std.is(data, Array)) {
@@ -172,7 +172,11 @@ class DataConcreter {
                 throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be string");
             }
             var c:String = array[0];
-            index = keys[c];
+			if (aliasToName != null && aliasToName.exists(c))
+			{
+				c = aliasToName[c];
+			}
+			index = keys[c];
         }
         var paramTypes = constractors[index];
         var params = [];
@@ -185,11 +189,11 @@ class DataConcreter {
         return Type.createEnumIndex(_enum, index, params);
     }
 
-    private function concreteClass(name:String, _class:Class<Dynamic>, fields:Map<String,String>, data:Dynamic, aliasToName:Null<Map<String, String>>):Dynamic {
+    private function concreteClass(name:String, _class:Class<Dynamic>, fields:Map<String,String>, data:Dynamic, nameToAlias:Null<Map<String, String>>):Dynamic {
         if (data == null) return null;
         if (_class == null) _class = Type.resolveClass(name);
         var result = Type.createEmptyInstance(_class);
-        setFields(result, fields, data, aliasToName);
+        setFields(result, fields, data, nameToAlias);
         return result;
     }
 
