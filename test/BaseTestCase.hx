@@ -86,12 +86,15 @@ class BaseTestCase extends NanoTestCase
 
         assertNotEquals(null, packer.parse("SampleClass", packer.print("SampleClass", new SampleClass())));
         assertNotEquals(null, packer.parse("IntData", packer.print("IntData", { i : -12 })));
+		assertNotEquals(null, packer.parse("IntDataAlias", packer.print("IntData", { i : -12 })));
+		assertNotEquals(null, packer.parse("IntDataAlias", packer.print("IntDataAlias", { i : -12 })));
         assertNotEquals(null, packer.parse("IntData", packer.print("IntData", new SampleClass())));
-        assertEquals(SampleEnum.NONE, packer.parse("SampleEnum", packer.print("SampleAbstract", new SampleAbstract(SampleEnum.NONE))));
+		assertEquals(SampleEnum.NONE, packer.parse("SampleEnum", packer.print("SampleAbstract", new SampleAbstract(SampleEnum.NONE))));
     }
 }
 
 typedef Empty = {};
 typedef ArrayEmpty = Array<Empty>;
 typedef IntData = {i : Int};
+typedef IntDataAlias = {@:serializeAlias("x") public var i : Int; };
 typedef StringVector = Vector<String>;

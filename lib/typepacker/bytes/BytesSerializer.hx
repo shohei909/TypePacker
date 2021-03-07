@@ -37,18 +37,19 @@ class BytesSerializer
     private function _serializeWithInfo(info:TypeInformation<Dynamic>, data:Dynamic, output:Output, mode:OutputMode):OutputMode 
     {
         switch (info) {
-            case TypeInformation.PRIMITIVE(nullable, type)                                       : serializePrimitive(nullable, type, data, output);
-            case TypeInformation.BYTES                                                           : serializeBytes(data, output);
-            case TypeInformation.STRING                                                          : mode = serializeString(data, output, mode); 
-            case TypeInformation.ENUM(_, _, keys, constractors)                                  : mode = serializeEnum(keys, constractors, data, output, mode);
-            case TypeInformation.CLASS(_, _, fields, fieldNames) | ANONYMOUS(fields, fieldNames) : mode = serializeClassInstance(fields, fieldNames, data, output, mode);
-            case TypeInformation.MAP(STRING, value)                                              : mode = serializeStringMap(value, data, output, mode);
-            case TypeInformation.MAP(INT, value)                                                 : mode = serializeIntMap(value, data, output, mode);
-            case TypeInformation.DYNAMIC_ACCESS(value)                                           : mode = serializeDynamicAccess(value, data, output, mode);
-            case TypeInformation.COLLECTION(elementType, type)                                   : mode = serializeCollection(elementType, type, data, output, mode);
-            case TypeInformation.ABSTRACT(type)                                                  : mode = serializeAbstract(type, data, output, mode);
-            case TypeInformation.CLASS_TYPE                                                      : mode = serializeClassType(data, output, mode);
-            case TypeInformation.ENUM_TYPE                                                       : mode = serializeEnumType(data, output, mode);
+            case TypeInformation.PRIMITIVE(nullable, type)                          : serializePrimitive(nullable, type, data, output);
+            case TypeInformation.BYTES                                              : serializeBytes(data, output);
+            case TypeInformation.STRING                                             : mode = serializeString(data, output, mode); 
+            case TypeInformation.ENUM(_, _, keys, constractors)                     : mode = serializeEnum(keys, constractors, data, output, mode);
+            case TypeInformation.CLASS(_, _, fields, fieldNames, nameToAlias) |
+			     TypeInformation.ANONYMOUS(  fields, fieldNames, nameToAlias)       : mode = serializeClassInstance(fields, fieldNames, data, output, mode);
+            case TypeInformation.MAP(STRING, value)                                 : mode = serializeStringMap(value, data, output, mode);
+            case TypeInformation.MAP(INT, value)                                    : mode = serializeIntMap(value, data, output, mode);
+            case TypeInformation.DYNAMIC_ACCESS(value)                              : mode = serializeDynamicAccess(value, data, output, mode);
+            case TypeInformation.COLLECTION(elementType, type)                      : mode = serializeCollection(elementType, type, data, output, mode);
+            case TypeInformation.ABSTRACT(type)                                     : mode = serializeAbstract(type, data, output, mode);
+            case TypeInformation.CLASS_TYPE                                         : mode = serializeClassType(data, output, mode);
+            case TypeInformation.ENUM_TYPE                                          : mode = serializeEnumType(data, output, mode);
         }
         return mode;
     }

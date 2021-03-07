@@ -16,7 +16,7 @@ class TypePackerTestCase extends BaseTestCase
 
     public function testBasic() {
         switch (TypePacker.toTypeInformation("SamplePair")) {
-            case TypeInformation.CLASS("cases.sample.SampleStringValue", _, types, names):
+            case TypeInformation.CLASS("cases.sample.SampleStringValue", _, types, names, nameToAlias):
                 assertMapEquals(
                     [
                         "key" => "String",
@@ -30,13 +30,13 @@ class TypePackerTestCase extends BaseTestCase
                     names
                 );
                 assertNotEquals(null, Type.resolveClass("cases.sample.SampleStringValue"));
-
+                assertEquals(null, nameToAlias);
             default:
                 fail("must be CLASS");
         }
 
         switch (TypePacker.toTypeInformation("SampleClass")) {
-            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names):
+            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names, nameToAlias):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
@@ -49,7 +49,15 @@ class TypePackerTestCase extends BaseTestCase
                     ],
                     types
                 );
-                assertArrayEquals(["c","e","i","str", "bytes", "stringMap","intMap"], names);
+                assertArrayEquals(["c", "e", "i", "str", "bytes", "stringMap", "intMap"], names);
+				assertMapEquals(
+                    [
+                        "str" => "s",
+                        "bytes" => "b",
+                    ],
+                    nameToAlias
+                );
+				
             default:
                 fail("must be CLASS");
         };
@@ -66,7 +74,7 @@ class TypePackerTestCase extends BaseTestCase
                 fail("must be ENUM TYPE:" + type);
         }
         switch (TypePacker.resolveType("cases.sample._Sample.SamplePrivateClass")) {
-            case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names):
+            case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names, nameToAlias):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
@@ -85,6 +93,14 @@ class TypePackerTestCase extends BaseTestCase
                     types
                 );
                 assertArrayEquals(["c","e","i","str","bytes","stringMap","intMap","c2","abst","f","arr","e2"], names);
+                assertMapEquals(
+                    [
+                        "str" => "s",
+                        "bytes" => "b",
+                    ],
+                    nameToAlias
+                );
+				
             default:
                 fail("must be CLASS");
         };

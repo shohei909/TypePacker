@@ -27,19 +27,19 @@ class BytesUnserialzer
     
     public function unserializeWithInfo<T>(info:TypeInformation<T>, input:Input):T {
         return switch (info) {
-            case TypeInformation.PRIMITIVE(nullable, type)               : unserializePrimitive(nullable, type, input);
-            case TypeInformation.BYTES                                   : unserializeBytes(input);
-            case TypeInformation.STRING                                  : unserializeString(input); 
-            case TypeInformation.ENUM(name, _enum, keys, constractors)   : unserializeEnum(name, _enum, keys, constractors, input);
-            case TypeInformation.CLASS(name, _class, fields, fieldNames) : unserializeClassInstance(name, _class, fields, fieldNames, input);
-            case TypeInformation.ANONYMOUS(fields, fieldNames)           : unserializeAnonymous(fields, fieldNames, input);
-            case TypeInformation.MAP(STRING, value)                      : unserializeStringMap(value, input);
-            case TypeInformation.MAP(INT, value)                         : unserializeIntMap(value, input);
-			case TypeInformation.DYNAMIC_ACCESS(value)                   : unserializeDynamicAccess(value, input);
-            case TypeInformation.COLLECTION(elementType, type)           : unserializeCollection(elementType, type, input);
-            case TypeInformation.ABSTRACT(type)                          : unserializeAbstract(type, input);
-            case TypeInformation.CLASS_TYPE                              : unserializeClassType(input);
-            case TypeInformation.ENUM_TYPE                               : unserializeEnumType(input);
+            case TypeInformation.PRIMITIVE(nullable, type)                               : unserializePrimitive(nullable, type, input);
+            case TypeInformation.BYTES                                                   : unserializeBytes(input);
+            case TypeInformation.STRING                                                  : unserializeString(input); 
+            case TypeInformation.ENUM(name, _enum, keys, constractors)                   : unserializeEnum(name, _enum, keys, constractors, input);
+            case TypeInformation.CLASS(name, _class, fields, fieldNames, nameToAlias)    : unserializeClassInstance(name, _class, fields, fieldNames, input);
+            case TypeInformation.ANONYMOUS(fields, fieldNames, nameToAlias)              : unserializeAnonymous(fields, fieldNames, input);
+            case TypeInformation.MAP(STRING, value)                                      : unserializeStringMap(value, input);
+            case TypeInformation.MAP(INT, value)                                         : unserializeIntMap(value, input);
+			case TypeInformation.DYNAMIC_ACCESS(value)                                   : unserializeDynamicAccess(value, input);
+            case TypeInformation.COLLECTION(elementType, type)                           : unserializeCollection(elementType, type, input);
+            case TypeInformation.ABSTRACT(type)                                          : unserializeAbstract(type, input);
+            case TypeInformation.CLASS_TYPE                                              : unserializeClassType(input);
+            case TypeInformation.ENUM_TYPE                                               : unserializeEnumType(input);
         }
     }
     private function unserializePrimitive(nullable:Bool, type:PrimitiveType, input:Input):Dynamic

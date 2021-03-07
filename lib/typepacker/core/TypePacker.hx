@@ -1,4 +1,5 @@
 package typepacker.core;
+import haxe.macro.ExprTools;
 
 
 #if macro
@@ -194,12 +195,13 @@ class TypePacker
                 var map = new Map();
                 var fieldNames = [];
                 var childParamsMap = null;
+				var aliasContext = new AliasContext();
 
                 while (true) {
                     childParamsMap = mapTypeParams(struct.params, params, childParamsMap);
                     var classFields = struct.fields.get();
                     classFields.reverse();
-                    mapFields(classFields, childParamsMap, map, fieldNames);
+                    mapFields(classFields, childParamsMap, map, fieldNames, aliasContext);
 
                     var superClass = struct.superClass;
                     if (superClass == null) break;
@@ -212,15 +214,16 @@ class TypePacker
                     }
                 }
                 fieldNames.reverse();
-                TypeInformation.CLASS(ref.toString(), null, map, fieldNames);
+                TypeInformation.CLASS(ref.toString(), null, map, fieldNames, aliasContext.nameToAlias);
 
             case TAnonymous(ref):
                 var struct = ref.get();
                 var map = new Map();
                 var fieldNames = [];
-                mapFields(struct.fields, null, map, fieldNames);
+				var aliasContext = new AliasContext();
+                mapFields(struct.fields, null, map, fieldNames, aliasContext);
 
-                TypeInformation.ANONYMOUS(map, fieldNames);
+                TypeInformation.ANONYMOUS(map, fieldNames, aliasContext.nameToAlias);
 
             case TAbstract(ref, params) :
                 var abst = ref.get();
@@ -264,13 +267,33 @@ class TypePacker
         return map;
     }
 
-    private static function mapFields(fields:Array<ClassField>, typeParams:Map<String, MacroType> = null, map:Map<String, String>, fieldNames:Array<String>) {
+    private static function mapFields(fields:Array<ClassField>, typeParams:Map<String, MacroType> = null, map:Map<String, String>, fieldNames:Array<String>, aliasContext:AliasContext) {
         if (typeParams == null)
         {
             typeParams = new Map();
         }
         for (f in fields) {
             if (f.meta.has(":noPack")) continue;
+			if (f.meta.has(":serializeAlias"))
+			{
+				for (meta in f.meta.extract(":serializeAlias"))
+				{
+					if (
+						meta.params != null &&
+						meta.params.length > 0
+					)
+					{
+						switch (meta.params[0].expr)
+						{
+							case ExprDef.EConst(Constant.CString(string, _)):
+								aliasContext.addAlias(f.name, string);
+								
+							case _:
+								throw ExprTools.toString(meta.params[0]) + " is unmatched parameter for @:serializeAlias";
+						}
+					}
+				}
+			}
 
             switch (f.kind) {
                 case FMethod(_):
@@ -351,4 +374,17 @@ class TypePacker
         Context.onAfterTyping(onAfterTyping);
         return null;
     }
+}
+
+class AliasContext
+{
+	public var nameToAlias(default, null):Null<Map<String, String>>;
+	
+	public function new() {}
+	
+	public function addAlias(name:String, alias:String):Void
+	{
+		if (nameToAlias == null) nameToAlias = new Map();
+		nameToAlias[name] = alias;
+	}
 }

@@ -56,10 +56,10 @@ class DataConcreter {
                 (concreteBytes(data) : Dynamic);
             case TypeInformation.ENUM(name, _enum, keys, constractors):
                 (concreteEnum(name, _enum, keys, constractors, data) : Dynamic);
-            case TypeInformation.CLASS(name, _class, fields, _) :
-                (concreteClass(name, _class, fields, data) : Dynamic);
-            case ANONYMOUS(fields, _) :
-                (concreteAnonymous(fields, data) : Dynamic);
+            case TypeInformation.CLASS(name, _class, fields, _, nameToAlias) :
+                (concreteClass(name, _class, fields, data, nameToAlias) : Dynamic);
+            case TypeInformation.ANONYMOUS(fields, _, nameToAlias) :
+                (concreteAnonymous(fields, data, nameToAlias) : Dynamic);
             case TypeInformation.MAP(INT, value) :
                 (concreteIntMap(value, data) : Dynamic);
             case TypeInformation.MAP(STRING, value) :
@@ -185,40 +185,43 @@ class DataConcreter {
         return Type.createEnumIndex(_enum, index, params);
     }
 
-    private function concreteClass(name:String, _class:Class<Dynamic>, fields:Map<String,String>, data:Dynamic):Dynamic {
+    private function concreteClass(name:String, _class:Class<Dynamic>, fields:Map<String,String>, data:Dynamic, aliasToName:Null<Map<String, String>>):Dynamic {
         if (data == null) return null;
         if (_class == null) _class = Type.resolveClass(name);
         var result = Type.createEmptyInstance(_class);
-        for (key in fields.keys()) {
-            var type = TypePacker.resolveType(fields[key]);
-            var f = if (!Reflect.hasField(data, key)) {
-                null;
-            } else {
-                Reflect.field(data, key);
-            }
-
-            var value = concrete(type, f);
-            Reflect.setField(result, key, value);
-        }
+        setFields(result, fields, data, aliasToName);
         return result;
     }
 
-    private function concreteAnonymous(fields:Map<String,String>, data:Dynamic):Dynamic {
+    private function concreteAnonymous(fields:Map<String,String>, data:Dynamic, nameToAlias:Null<Map<String, String>>):Dynamic {
         if (data == null) return null;
         var result = {};
+        setFields(result, fields, data, nameToAlias);
+        return result;
+    }
+	
+	private function setFields(result:Dynamic, fields:Map<String,String>, data:Dynamic, nameToAlias:Null<Map<String, String>>):Void
+	{
         for (key in fields.keys()) {
             var type = TypePacker.resolveType(fields[key]);
-            var f = if (!Reflect.hasField(data, key)) {
-                null;
+			var f = if (!Reflect.hasField(data, key)) {
+				if (nameToAlias == null || !nameToAlias.exists(key)) {
+					null; 
+				} else {
+					var alias = nameToAlias[key];
+					if (!Reflect.hasField(data, alias)) {
+						null;
+					} else {
+						Reflect.field(data, alias);
+					}
+				}
             } else {
                 Reflect.field(data, key);
             }
-
             var value = concrete(type, f);
             Reflect.setField(result, key, value);
         }
-        return result;
-    }
+	}
 
     private function concreteStringMap(valueType:String, data:Dynamic) {
         if (data == null) return null;

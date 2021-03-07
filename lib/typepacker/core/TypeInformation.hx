@@ -3,8 +3,8 @@ import haxe.ds.Vector;
 
 enum TypeInformation<T>
 {
-    ANONYMOUS(fieldTypes:Map<String,String>, fieldNames:Array<String>);
-    CLASS(type:String, _class:Class<Dynamic>, fieldTypes:Map<String,String>, fieldNames:Array<String>);
+    ANONYMOUS(fieldTypes:Map<String,String>, fieldNames:Array<String>, nameToAlias:Null<Map<String, String>>);
+    CLASS(type:String, _class:Class<Dynamic>, fieldTypes:Map<String,String>, fieldNames:Array<String>, nameToAlias:Null<Map<String, String>>);
     ENUM(type:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constructors:Map<Int, Array<String>>);
     MAP(keyType:MapKeyType, valueType:String);
     ABSTRACT(baseType:String);
@@ -33,5 +33,3 @@ enum TypeInformation<T>
     var LIST = 1;
     var VECTOR = 2;
 }
-
-

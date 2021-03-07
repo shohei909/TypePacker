@@ -7,8 +7,8 @@ class SampleClass
     public var c:SamplePrivateClass;
     public var e:SampleEnum;
     public var i:Int;
-    public var str:String;
-    public var bytes:Bytes;
+    @:serializeAlias("s") public var str:String;
+    @:serializeAlias("b") public var bytes:Bytes;
     public var stringMap:Map<String, Int>;
     public var intMap:Map<Int, List<Int>>;
 

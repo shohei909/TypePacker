@@ -31,6 +31,8 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals("[null,{}]", Json.print("ArrayEmpty", [null, { } ]));
         assertEquals("{\"i\":-12}", Json.print("IntData", { i : -12 } ));
         assertEquals("{\"i\":50}", Json.print("IntData", new SampleClass()));
+        assertEquals("{\"x\":50}", Json.print("IntDataAlias", new SampleClass()));
+		
         if (Json.defaultPacker.setting.useEnumIndex) {
             assertEquals("[1]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
         } else {
