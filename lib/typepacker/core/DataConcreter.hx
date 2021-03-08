@@ -56,10 +56,10 @@ class DataConcreter {
                 (concreteBytes(data) : Dynamic);
             case TypeInformation.ENUM(name, _enum, keys, constractors, nameToAlias, aliasToName):
                 (concreteEnum(name, _enum, keys, constractors, data, aliasToName) : Dynamic);
-            case TypeInformation.CLASS(name, _class, fields, _, nameToAlias) :
-                (concreteClass(name, _class, fields, data, nameToAlias) : Dynamic);
-            case TypeInformation.ANONYMOUS(fields, _, nameToAlias) :
-                (concreteAnonymous(fields, data, nameToAlias) : Dynamic);
+            case TypeInformation.CLASS(name, _class, fieldTypes, fieldNames, nameToAlias, serializeToArray) :
+                (concreteClass(name, _class, fieldTypes, fieldNames, data, nameToAlias, serializeToArray) : Dynamic);
+            case TypeInformation.ANONYMOUS(fieldTypes, fieldNames, nameToAlias, serializeToArray) :
+                (concreteAnonymous(fieldTypes, fieldNames, data, nameToAlias, serializeToArray) : Dynamic);
             case TypeInformation.MAP(INT, value) :
                 (concreteIntMap(value, data) : Dynamic);
             case TypeInformation.MAP(STRING, value) :
@@ -189,42 +189,61 @@ class DataConcreter {
         return Type.createEnumIndex(_enum, index, params);
     }
 
-    private function concreteClass(name:String, _class:Class<Dynamic>, fields:Map<String,String>, data:Dynamic, nameToAlias:Null<Map<String, String>>):Dynamic {
+    private function concreteClass(name:String, _class:Class<Dynamic>, fields:Map<String,String>, fieldNames:Array<String>, data:Dynamic, nameToAlias:Null<Map<String, String>>, serializeToArray:Bool):Dynamic {
         if (data == null) return null;
         if (_class == null) _class = Type.resolveClass(name);
-        var result = Type.createEmptyInstance(_class);
-        setFields(result, fields, data, nameToAlias);
-        return result;
+        
+		var result = Type.createEmptyInstance(_class);
+		setFields(result, fields, fieldNames, data, nameToAlias, serializeToArray);
+		return result;
     }
 
-    private function concreteAnonymous(fields:Map<String,String>, data:Dynamic, nameToAlias:Null<Map<String, String>>):Dynamic {
+    private function concreteAnonymous(fields:Map<String,String>, fieldNames:Array<String>, data:Dynamic, nameToAlias:Null<Map<String, String>>, serializeToArray:Bool):Dynamic {
         if (data == null) return null;
-        var result = {};
-        setFields(result, fields, data, nameToAlias);
-        return result;
+		var result = {};
+		setFields(result, fields, fieldNames, data, nameToAlias, serializeToArray);
+		return result;
     }
 	
-	private function setFields(result:Dynamic, fields:Map<String,String>, data:Dynamic, nameToAlias:Null<Map<String, String>>):Void
+	private function setFields(result:Dynamic, fields:Map<String,String>, fieldNames:Array<String>, data:Dynamic, nameToAlias:Null<Map<String, String>>, serializeToArray:Bool):Void
 	{
-        for (key in fields.keys()) {
-            var type = TypePacker.resolveType(fields[key]);
-			var f = if (!Reflect.hasField(data, key)) {
-				if (nameToAlias == null || !nameToAlias.exists(key)) {
-					null; 
-				} else {
-					var alias = nameToAlias[key];
-					if (!Reflect.hasField(data, alias)) {
-						null;
+		if (serializeToArray)
+		{
+			if (!Std.is(data, Array)) throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Array (because @:serializeToArray)");
+			var array:Array<Dynamic> = cast data;
+			if (array.length < fieldNames.length) throw new TypePackerError(TypePackerError.FAIL_TO_READ, "not enough fields");
+			for (i in 0...fieldNames.length) 
+			{
+				var key = fieldNames[i];
+				var type = TypePacker.resolveType(fields[key]);
+				var f = array[i];
+				var value = concrete(type, f);
+				Reflect.setField(result, key, value);
+			}
+		}
+		else
+		{
+			for (key in fieldNames) 
+			{
+				var type = TypePacker.resolveType(fields[key]);
+				var f = if (!Reflect.hasField(data, key)) {
+					if (nameToAlias == null || !nameToAlias.exists(key)) {
+						null; 
 					} else {
-						Reflect.field(data, alias);
+						var alias = nameToAlias[key];
+						if (!Reflect.hasField(data, alias)) {
+							null;
+						} else {
+							Reflect.field(data, alias);
+						}
 					}
+				} else {
+					Reflect.field(data, key);
 				}
-            } else {
-                Reflect.field(data, key);
-            }
-            var value = concrete(type, f);
-            Reflect.setField(result, key, value);
-        }
+				var value = concrete(type, f);
+				Reflect.setField(result, key, value);
+			}
+		}
 	}
 
     private function concreteStringMap(valueType:String, data:Dynamic) {

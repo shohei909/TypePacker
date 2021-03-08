@@ -5,6 +5,7 @@ import cases.sample.Sample.SamplePair;
 import cases.sample.Sample.SampleEnum;
 import typepacker.core.TypeInformation;
 import typepacker.core.TypePacker;
+import BaseTestCase;
 
 /**
  * ...
@@ -16,7 +17,7 @@ class TypePackerTestCase extends BaseTestCase
 
     public function testBasic() {
         switch (TypePacker.toTypeInformation("SamplePair")) {
-            case TypeInformation.CLASS("cases.sample.SampleStringValue", _, types, names, nameToAlias):
+            case TypeInformation.CLASS("cases.sample.SampleStringValue", _, types, names, nameToAlias, serializeToArray):
                 assertMapEquals(
                     [
                         "key" => "String",
@@ -31,12 +32,13 @@ class TypePackerTestCase extends BaseTestCase
                 );
                 assertNotEquals(null, Type.resolveClass("cases.sample.SampleStringValue"));
                 assertEquals(null, nameToAlias);
+				assertEquals(false, serializeToArray);
             default:
                 fail("must be CLASS");
         }
 
         switch (TypePacker.toTypeInformation("SampleClass")) {
-            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names, nameToAlias):
+            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names, nameToAlias, serializeToArray):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
@@ -57,6 +59,14 @@ class TypePackerTestCase extends BaseTestCase
                     ],
                     nameToAlias
                 );
+				assertEquals(false, serializeToArray);
+				
+            default:
+                fail("must be CLASS");
+        };
+        switch (TypePacker.toTypeInformation("SampleClassSerializeToArray")) {
+            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names, nameToAlias, serializeToArray):
+                assertEquals(true, serializeToArray);
 				
             default:
                 fail("must be CLASS");
@@ -74,7 +84,7 @@ class TypePackerTestCase extends BaseTestCase
                 fail("must be ENUM TYPE:" + type);
         }
         switch (TypePacker.resolveType("cases.sample._Sample.SamplePrivateClass")) {
-            case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names, nameToAlias):
+            case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names, nameToAlias, serializeToArray):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",

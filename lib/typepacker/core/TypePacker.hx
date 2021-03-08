@@ -101,10 +101,18 @@ class TypePacker
         var t = type, prevT = null;
         var nullable = false;
         registered[name] = null;
-        
+        var serializeToArray = false;
+		
         do {
             if (isNullType(t)) {
                 nullable = true;
+            }
+            switch (t) 
+            {
+                case TType    (ref, _): if (ref.get().meta.has(":serializeToArray")) { serializeToArray = true; }
+                case TAbstract(ref, _): if (ref.get().meta.has(":serializeToArray")) { serializeToArray = true; }
+                case TInst    (ref, _): if (ref.get().meta.has(":serializeToArray")) { serializeToArray = true; }
+				case _:
             }
             switch (t) 
             {
@@ -216,7 +224,7 @@ class TypePacker
                     }
                 }
                 fieldNames.reverse();
-                TypeInformation.CLASS(ref.toString(), null, map, fieldNames, aliasContext.nameToAlias);
+                TypeInformation.CLASS(ref.toString(), null, map, fieldNames, aliasContext.nameToAlias, serializeToArray);
 
             case TAnonymous(ref):
                 var struct = ref.get();
@@ -225,7 +233,7 @@ class TypePacker
 				var aliasContext = new AliasContext();
                 mapFields(struct.fields, null, map, fieldNames, aliasContext);
 
-                TypeInformation.ANONYMOUS(map, fieldNames, aliasContext.nameToAlias);
+                TypeInformation.ANONYMOUS(map, fieldNames, aliasContext.nameToAlias, serializeToArray);
 
             case TAbstract(ref, params) :
                 var abst = ref.get();

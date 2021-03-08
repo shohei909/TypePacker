@@ -85,6 +85,8 @@ class BaseTestCase extends NanoTestCase
         }
 
         assertNotEquals(null, packer.parse("SampleClass", packer.print("SampleClass", new SampleClass())));
+        assertNotEquals(null, packer.parse("SampleClassSerializeToArray", packer.print("SampleClassSerializeToArray", new SampleClass())));
+		
         assertDynamicEquals({ i : -12 }, packer.parse("IntData"     , packer.print("IntData"     , { i : -12 })));
 		assertDynamicEquals({ i : -12 }, packer.parse("IntDataAlias", packer.print("IntData"     , { i : -12 })));
 		assertDynamicEquals({ i : -12 }, packer.parse("IntDataAlias", packer.print("IntDataAlias", { i : -12 })));
@@ -98,3 +100,4 @@ typedef ArrayEmpty = Array<Empty>;
 typedef IntData = {i : Int};
 typedef IntDataAlias = {@:serializeAlias("x") public var i : Int; };
 typedef StringVector = Vector<String>;
+@:serializeToArray typedef SampleClassSerializeToArray = SampleClass;

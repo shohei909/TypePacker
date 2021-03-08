@@ -57,9 +57,9 @@ class DataSimplifier {
                 (simplifyBytes(data) : Dynamic);
             case TypeInformation.ENUM(_, _, keys, constractors, nameToAlias, aliasToName):
                 (simplifyEnum(keys, constractors, data, nameToAlias) : Dynamic);
-            case TypeInformation.CLASS(_, _, fields, fieldNames, nameToAlias) | 
-			     TypeInformation.ANONYMOUS(fields, fieldNames, nameToAlias) :
-                (simplifyClassInstance(fields, fieldNames, data, nameToAlias) : Dynamic);
+            case TypeInformation.CLASS(_, _, fields, fieldNames, nameToAlias, serializeToArray) | 
+			     TypeInformation.ANONYMOUS(fields, fieldNames, nameToAlias, serializeToArray) :
+                (simplifyClassInstance(fields, fieldNames, data, nameToAlias, serializeToArray) : Dynamic);
             case TypeInformation.MAP(STRING, value) :
                 (simplifyStringMap(value, (data:Dynamic)) : Dynamic);
             case TypeInformation.MAP(INT, value) :
@@ -167,24 +167,42 @@ class DataSimplifier {
         return result;
     }
 
-    private function simplifyClassInstance(fields:Map<String,String>, fieldNames:Array<String>, data:Dynamic, nameToAlias:Null<Map<String, String>>):Dynamic {
+    private function simplifyClassInstance(fields:Map<String,String>, fieldNames:Array<String>, data:Dynamic, nameToAlias:Null<Map<String, String>>, serializeToArray:Bool):Dynamic {
         if (data == null) return null;
-        var result = {};
-        for (key in fieldNames) {
-            var type = TypePacker.resolveType(fields[key]);
-            var f = if (!Reflect.hasField(data, key)) {
-                null;
-            } else {
-                Reflect.field(data, key);
-            }
-			if (nameToAlias != null && nameToAlias.exists(key)) 
+		if (serializeToArray)
+		{
+			var array = [];
+			for (key in fieldNames)
 			{
-				key = nameToAlias[key];
+				var type = TypePacker.resolveType(fields[key]);
+				var f = if (!Reflect.hasField(data, key)) {
+					null; 
+				} else {
+					Reflect.field(data, key);
+				}
+				array.push(simplify(type, f));
 			}
-            var value = simplify(type, f);
-            Reflect.setField(result, key, value);
-        }
-        return result;
+			return array;
+		}
+		else
+		{
+			var result = {};
+			for (key in fieldNames) {
+				var type = TypePacker.resolveType(fields[key]);
+				var f = if (!Reflect.hasField(data, key)) {
+					null;
+				} else {
+					Reflect.field(data, key);
+				}
+				if (nameToAlias != null && nameToAlias.exists(key)) 
+				{
+					key = nameToAlias[key];
+				}
+				var value = simplify(type, f);
+				Reflect.setField(result, key, value);
+			}
+			return result;
+		}
     }
 
     private function simplifyStringMap(valueType:String, data:Map<String, Dynamic>):Dynamic {
