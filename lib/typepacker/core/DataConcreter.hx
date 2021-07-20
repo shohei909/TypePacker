@@ -120,7 +120,9 @@ class DataConcreter {
 
 
     private function concreteArray<T>(elementTypeString:String, data:Array<T>):Array<T> {
-        if (data == null) return null;
+        if (data == null) {
+			return if (setting.initializesWithEmptyArray) [] else null;
+		}
         if (!Std.is(data, Array)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be array");
         }
@@ -135,8 +137,9 @@ class DataConcreter {
     }
 
     private function concreteVector<T>(elementTypeString:String, data:Array<T>):Vector<T> {
-        if (data == null) return null;
-
+		if (data == null) {
+			return if (setting.initializesWithEmptyVector) new Vector(0) else null;
+		}
         #if (cs || java)
         throw "concrete Vector is not supported in this platform";
         return null;
@@ -146,7 +149,9 @@ class DataConcreter {
     }
 
     private function concreteList<T>(elementTypeString:String, data:Array<T>):List<T> {
-        if (data == null) return null;
+        if (data == null) {
+			return if (setting.initializesWithEmptyList) new List() else null;
+		}
         return Lambda.list(concreteArray(elementTypeString, data));
     }
 
@@ -199,7 +204,9 @@ class DataConcreter {
     }
 
     private function concreteAnonymous(fields:Map<String,String>, fieldNames:Array<String>, data:Dynamic, nameToAlias:Null<Map<String, String>>, serializeToArray:Bool):Dynamic {
-        if (data == null) return null;
+        if (data == null) {
+			return if (setting.initializesWithEmptyAnonymous) {} else null;
+		}
 		var result = {};
 		setFields(result, fields, fieldNames, data, nameToAlias, serializeToArray);
 		return result;
@@ -247,8 +254,9 @@ class DataConcreter {
 	}
 
     private function concreteStringMap(valueType:String, data:Dynamic) {
-        if (data == null) return null;
-
+        if (data == null) {
+			return if (setting.initializesWithEmptyMap) new Map() else null;
+		}
         var result:Map<String, Dynamic> = new Map();
         var type = TypePacker.resolveType(valueType);
 
@@ -258,9 +266,10 @@ class DataConcreter {
 
         return result;
     }
-    private function concreteDynamicAccess(valueType:String, data:Dynamic) {
-        if (data == null) return null;
-
+    private function concreteDynamicAccess(valueType:String, data:Dynamic):DynamicAccess<Dynamic> {
+        if (data == null) {
+			return if (setting.initializesWithEmptyDynamicAccess) {} else null;
+		}
         var result:DynamicAccess<Dynamic> = {};
         var type = TypePacker.resolveType(valueType);
 
@@ -272,8 +281,9 @@ class DataConcreter {
     }
 
     private function concreteIntMap(valueType:String, data:Dynamic) {
-        if (data == null) return null;
-
+        if (data == null) {
+			return if (setting.initializesWithEmptyMap) new Map() else null;
+		}
         var result:Map<Int, Dynamic> = new Map();
         var type = TypePacker.resolveType(valueType);
 
