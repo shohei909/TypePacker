@@ -23,11 +23,19 @@ class DataConcreter {
     public function concrete<T>(typeInfo:TypeInformation<T>, data:Dynamic):T {
         return switch(typeInfo) {
             case TypeInformation.PRIMITIVE(nullable, type) :
-                if ((setting.forceNullable || nullable) && (data == null)) {
-                    null;
-                } else {
-                    constructPrimitive(type, data);
+				switch (type)
+				{
+                    case PrimitiveType.INT   if (!nullable && setting.initializesWithZero  && data == null) : cast 0;
+                    case PrimitiveType.FLOAT if (!nullable && setting.initializesWithZero  && data == null) : cast 0.0;
+                    case PrimitiveType.BOOL  if (!nullable && setting.initializesWithFalse && data == null) : cast false;
+                    case _: 
+                        if ((setting.forceNullable || nullable) && (data == null)) {
+                            null;
+                        } else {
+                            constructPrimitive(type, data);
+                        }
                 }
+                
             case TypeInformation.STRING :
                 if (data == null) {
                     data;

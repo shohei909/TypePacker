@@ -13,6 +13,8 @@ class PackerSetting {
     public var initializesWithEmptyVector        = false;
     public var initializesWithEmptyDynamicAccess = false;
     public var initializesWithEmptyAnonymous     = false;
+    public var initializesWithFalse              = false;
+    public var initializesWithZero               = false;
 	
     public function new () {}
 }
