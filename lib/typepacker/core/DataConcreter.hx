@@ -23,8 +23,8 @@ class DataConcreter {
     public function concrete<T>(typeInfo:TypeInformation<T>, data:Dynamic):T {
         return switch(typeInfo) {
             case TypeInformation.PRIMITIVE(nullable, type) :
-				switch (type)
-				{
+                switch (type)
+                {
                     case PrimitiveType.INT   if (!nullable && setting.initializesWithZero  && data == null) : cast 0;
                     case PrimitiveType.FLOAT if (!nullable && setting.initializesWithZero  && data == null) : cast 0.0;
                     case PrimitiveType.BOOL  if (!nullable && setting.initializesWithFalse && data == null) : cast false;
