@@ -24,7 +24,7 @@ class DataSimplifier {
     public function simplify<T>(typeInfo:TypeInformation<T>, data:T) : Dynamic {
         return switch(typeInfo) {
             case TypeInformation.PRIMITIVE(nullable, type) :
-                if (nullable && (data == null)) {
+                if ((setting.forceNullable || nullable) && (data == null)) {
                     data;
                 } else {
                     simplifyPrimitive(type, data);
@@ -35,7 +35,7 @@ class DataSimplifier {
                 } else if (Std.is(data, String)) {
                     data;
                 } else {
-                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
+                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String : actual " + data);
                 }
             case TypeInformation.CLASS_TYPE:
                 if (data == null) {
@@ -43,7 +43,7 @@ class DataSimplifier {
                 } else if (Std.is(data, Class)) {
                     (Type.getClassName((data:Dynamic)) : Dynamic);
                 } else {
-                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
+                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T> : actual " + data);
                 }
             case TypeInformation.ENUM_TYPE:
                 if (data == null) {
@@ -51,7 +51,7 @@ class DataSimplifier {
                 } else if (Std.is(data, Enum)) {
                     (Type.getEnumName((data:Dynamic)) : Dynamic);
                 } else {
-                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Enum<T>");
+                    throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Enum<T> : actual " + data);
                 }
             case TypeInformation.BYTES:
                 (simplifyBytes(data) : Dynamic);
@@ -86,7 +86,7 @@ class DataSimplifier {
         return if (Std.is(data, t)) {
             data;
         } else {
-            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be " + t);
+            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be " + type + " : actual " + data);
         }
     }
     private function simplifyBytes(data:Dynamic):Dynamic {
@@ -100,7 +100,7 @@ class DataSimplifier {
                 data;
             }
         } else {
-            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes");
+            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Bytes : actual " + data);
         }
     }
     private function simplifyAbstract(typeString:String, data:Dynamic) {
@@ -136,7 +136,7 @@ class DataSimplifier {
     private function simplifyEnum(keys:Map<String, Int>, constractors:Map<Int,Array<String>>, data:Dynamic, nameToAlias:Null<Map<String, String>>) {
         if (data == null) return null;
         if (setting.validates && !Reflect.isEnumValue(data)) {
-            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be enum");
+            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be enum : actual " + data);
         }
 
         var result:Array<Dynamic> = [];
@@ -212,7 +212,7 @@ class DataSimplifier {
 
         for (key in data.keys()) {
             if (!Std.is(key, String)) {
-                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "key must be String");
+                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "key must be String : actual " + key);
             }
 
             var value = simplify(type, data.get(key));
@@ -228,7 +228,7 @@ class DataSimplifier {
 
         for (key in data.keys()) {
             if (!Std.is(key, Int)) {
-                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "key must be Int");
+                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "key must be Int : actual " + key);
             }
 
             var value = simplify(type, data.get(key));
