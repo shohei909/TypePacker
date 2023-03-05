@@ -89,7 +89,7 @@ class DataConcreter {
     private function constructPrimitive(type:PrimitiveType, data:Dynamic):Dynamic {
         var t:Dynamic = switch (type) {
             case PrimitiveType.INT:
-                Int;
+                if (setting.intAsFloat) Float else Int;
             case PrimitiveType.BOOL:
                 Bool;
             case PrimitiveType.FLOAT:
