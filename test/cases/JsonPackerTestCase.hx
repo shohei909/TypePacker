@@ -57,11 +57,11 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals(SampleAliasEnum.BBB, Json.parse("SampleAliasEnum", "[\"BBB\"]"));
 		
 		
-        assertTrue(Std.is(Json.parse("List<Int>", "[5]"), List));
+        assertTrue(Std.isOfType(Json.parse("List<Int>", "[5]"), List));
         // assertEquals("5", Json.parse(StringVector, '["5"]')[0]);
 
         var cl = Json.parse("SampleClass", "{\"i\":50}");
-        assertTrue(Std.is(cl, SampleClass));
+        assertTrue(Std.isOfType(cl, SampleClass));
         assertEquals(50, cl.i);
         assertEquals(null, cl.str);
 

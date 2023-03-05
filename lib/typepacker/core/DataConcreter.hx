@@ -39,7 +39,7 @@ class DataConcreter {
             case TypeInformation.STRING :
                 if (data == null) {
                     data;
-                } else if (Std.is(data, String)) {
+                } else if (Std.isOfType(data, String)) {
                     data;
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String");
@@ -47,7 +47,7 @@ class DataConcreter {
             case TypeInformation.CLASS_TYPE:
                 if (data == null) {
                     null;
-                } else if (Std.is(data, String)) {
+                } else if (Std.isOfType(data, String)) {
                     (Type.resolveClass(data) : Dynamic);
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T>");
@@ -55,7 +55,7 @@ class DataConcreter {
             case TypeInformation.ENUM_TYPE:
                 if (data == null) {
                     null;
-                } else if (Std.is(data, String)) {
+                } else if (Std.isOfType(data, String)) {
                     (Type.resolveEnum(data) : Dynamic);
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be ENUM<T>");
@@ -96,7 +96,7 @@ class DataConcreter {
                 Float;
         }
 
-        return if (Std.is(data, t)) {
+        return if (Std.isOfType(data, t)) {
             data;
         } else {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be " + t + " but " + data);
@@ -105,11 +105,11 @@ class DataConcreter {
     private function concreteBytes(data:Dynamic):Dynamic {
         return if (data == null) {
             null;
-        } else if (Std.is(data, Bytes)) {
+        } else if (Std.isOfType(data, Bytes)) {
             data;
         } else {
             if (setting.bytesToBase64) {
-                if (Std.is(data, String)) {
+                if (Std.isOfType(data, String)) {
                     if (base64 == null) base64 = new BaseCode(Base64.BYTES);
                     base64.decodeBytes(Bytes.ofString(data));
                 } else {
@@ -131,7 +131,7 @@ class DataConcreter {
         if (data == null) {
 			return if (setting.initializesWithEmptyArray) [] else null;
 		}
-        if (!Std.is(data, Array)) {
+        if (!Std.isOfType(data, Array)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be array");
         }
 
@@ -166,7 +166,7 @@ class DataConcreter {
     private function concreteEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constractors:Map<Int, Array<String>>, data:Dynamic, aliasToName:Null<Map<String, String>>):EnumValue {
         if (data == null) return null;
         if (_enum == null) _enum = Type.resolveEnum(name);
-        if (!Std.is(data, Array)) {
+        if (!Std.isOfType(data, Array)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be array");
         }
 
@@ -174,14 +174,14 @@ class DataConcreter {
         var index:Int;
         if (setting.useEnumIndex)
         {
-            if (!Std.is(array[0], Int)) {
+            if (!Std.isOfType(array[0], Int)) {
                 throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be int");
             }
             index = array[0];
         }
         else
         {
-            if (!Std.is(array[0], String)) {
+            if (!Std.isOfType(array[0], String)) {
                 throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be string");
             }
             var c:String = array[0];
@@ -224,7 +224,7 @@ class DataConcreter {
 	{
 		if (serializeToArray)
 		{
-			if (!Std.is(data, Array)) throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Array (because @:serializeToArray)");
+			if (!Std.isOfType(data, Array)) throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Array (because @:serializeToArray)");
 			var array:Array<Dynamic> = cast data;
 			if (array.length < fieldNames.length) throw new TypePackerError(TypePackerError.FAIL_TO_READ, "not enough fields");
 			for (i in 0...fieldNames.length) 

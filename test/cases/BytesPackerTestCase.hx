@@ -52,7 +52,7 @@ class BytesPackerTestCase extends BaseTestCase
         }
         {
             var data:SampleClass = convert(TypePacker.toTypeInformation("SampleClass"), new SampleClass());
-            assertTrue(Std.is(data, SampleClass));
+            assertTrue(Std.isOfType(data, SampleClass));
             assertEquals(50, data.i);
             assertEquals(null, data.e);
             assertEquals("hoge", data.str);

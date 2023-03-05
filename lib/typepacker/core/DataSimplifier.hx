@@ -32,7 +32,7 @@ class DataSimplifier {
             case TypeInformation.STRING :
                 if (data == null) {
                     data;
-                } else if (Std.is(data, String)) {
+                } else if (Std.isOfType(data, String)) {
                     data;
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be String : actual " + data);
@@ -40,7 +40,7 @@ class DataSimplifier {
             case TypeInformation.CLASS_TYPE:
                 if (data == null) {
                     null;
-                } else if (Std.is(data, Class)) {
+                } else if (Std.isOfType(data, Class)) {
                     (Type.getClassName((data:Dynamic)) : Dynamic);
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Class<T> : actual " + data);
@@ -48,7 +48,7 @@ class DataSimplifier {
             case TypeInformation.ENUM_TYPE:
                 if (data == null) {
                     null;
-                } else if (Std.is(data, Enum)) {
+                } else if (Std.isOfType(data, Enum)) {
                     (Type.getEnumName((data:Dynamic)) : Dynamic);
                 } else {
                     throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be Enum<T> : actual " + data);
@@ -83,7 +83,7 @@ class DataSimplifier {
                 Float;
         }
 
-        return if (Std.is(data, t)) {
+        return if (Std.isOfType(data, t)) {
             data;
         } else {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be " + type + " : actual " + data);
@@ -92,7 +92,7 @@ class DataSimplifier {
     private function simplifyBytes(data:Dynamic):Dynamic {
         return if (data == null) {
             data;
-        } else if (Std.is(data, Bytes)) {
+        } else if (Std.isOfType(data, Bytes)) {
             if (setting.bytesToBase64) {
                 if (base64 == null) base64 = new BaseCode(Base64.BYTES);
                 base64.encodeBytes(data).toString();
@@ -211,7 +211,7 @@ class DataSimplifier {
         var type = TypePacker.resolveType(valueType);
 
         for (key in data.keys()) {
-            if (!Std.is(key, String)) {
+            if (!Std.isOfType(key, String)) {
                 throw new TypePackerError(TypePackerError.FAIL_TO_READ, "key must be String : actual " + key);
             }
 
@@ -227,7 +227,7 @@ class DataSimplifier {
         var type = TypePacker.resolveType(valueType);
 
         for (key in data.keys()) {
-            if (!Std.is(key, Int)) {
+            if (!Std.isOfType(key, Int)) {
                 throw new TypePackerError(TypePackerError.FAIL_TO_READ, "key must be Int : actual " + key);
             }
 
