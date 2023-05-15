@@ -1,8 +1,8 @@
 package typepacker.core;
-import haxe.macro.ExprTools;
-
 
 #if macro
+import haxe.display.Display.Platform;
+import haxe.macro.ExprTools;
 import haxe.EnumTools.EnumValueTools;
 import haxe.ds.IntMap;
 import haxe.ds.Map;
@@ -304,6 +304,7 @@ class TypePacker
     {
         if (defined) return;
         defined = true;
+		
         // see https://github.com/HaxeFoundation/haxe/issues/6254#issuecomment-502017733
         var expr = makeExpr(registered);
         var type = macro class TypePackerResource2 {
@@ -311,7 +312,9 @@ class TypePacker
 			@:keep public function new() {}
         };
         type.meta.push({name:"@:keep", pos:Context.currentPos()});
-        Context.defineType(type);
+		Context.defineType(type);
+		
+		if (Compiler.getConfiguration().platform == Platform.Hl) return;
         Compiler.exclude("TypePackerResource");
     }
     

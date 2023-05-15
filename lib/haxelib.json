@@ -2,10 +2,10 @@
   "name": "typepacker",
   "url" : "https://github.com/shohei909/typepacker",
   "license": "MIT",
-  "tags": ["flash", "cpp", "js", "neko", "cs", "json"],
+  "tags": ["flash", "cpp", "js", "neko", "cs", "json", "hl"],
   "description": "typed json serializer",
-  "version": "1.2.0",
-  "releasenote": "fix Std.is -> Std.isTypeOf",
+  "version": "1.3.0",
+  "releasenote": "hashlink support",
   "contributors": ["shohei909"],
   "dependencies": {}
 }
