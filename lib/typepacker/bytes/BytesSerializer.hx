@@ -342,7 +342,7 @@ class BytesSerializer
     }
 }
 
-@:enum abstract OutputMode(Int) {
+enum abstract OutputMode(Int) {
     var Unknown   = 0;
     #if flash
     var ByteArray = 1;

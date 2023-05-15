@@ -17,18 +17,18 @@ enum TypeInformation<T>
 	DYNAMIC_ACCESS(elementType:String);
 }
 
-@:enum abstract MapKeyType(Int) from Int {
+enum abstract MapKeyType(Int) from Int {
     var STRING = 0;
     var INT = 1;
 }
 
-@:enum abstract PrimitiveType(Int) from Int {
+enum abstract PrimitiveType(Int) from Int {
     var INT = 0;
     var BOOL = 1;
     var FLOAT = 2;
 }
 
-@:enum abstract CollectionType(Int) from Int {
+enum abstract CollectionType(Int) from Int {
     var ARRAY = 0;
     var LIST = 1;
     var VECTOR = 2;
