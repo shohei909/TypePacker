@@ -289,6 +289,8 @@ class TypePacker
             switch (f.kind) {
                 case FMethod(_):
                     continue;
+				case FVar(AccCall | AccNever, AccCall | AccNever) :
+					if (!f.meta.has(":isVar")) { continue; }
                 default:
             }
 
