@@ -24,11 +24,19 @@ class Json {
     }
     
     public static function printWithInfo<T>(info:TypeInformation<T>, data:T):String {
+		if (data == null && defaultPacker.setting.forceNullable)
+		{
+			return null;
+		}
         return defaultPacker.printWithInfo(info, data);
     }
 
     public static function parseWithInfo<T>(info:TypeInformation<T>, data:String):T {
-        return defaultPacker.parseWithInfo(info, data);
+        if (data == null && defaultPacker.setting.forceNullable)
+		{
+			return null;
+		}
+		return defaultPacker.parseWithInfo(info, data);
     }
     #end
 
