@@ -1,6 +1,6 @@
 #1. compile
 -main TestMain
--hl bin/test.c
+-hl bin/test.hl
 -lib nanotest
 -lib yaml
 -cp lib

@@ -41,7 +41,7 @@ class BytesSerializer
             case TypeInformation.BYTES                                                          : serializeBytes(data, output);
             case TypeInformation.STRING                                                         : mode = serializeString(data, output, mode); 
             case TypeInformation.ENUM(_, _, keys, constractors, nameToAlias, aliasToName)       : mode = serializeEnum(keys, constractors, data, output, mode);
-            case TypeInformation.CLASS(_, _, fields, fieldNames, nameToAlias, serializeToArray) |
+            case TypeInformation.CLASS(_, _, fields, fieldNames, nameToAlias, serializeToArray, _) |
 			     TypeInformation.ANONYMOUS(  fields, fieldNames, nameToAlias, serializeToArray) : mode = serializeClassInstance(fields, fieldNames, data, output, mode);
             case TypeInformation.MAP(STRING, value)                                             : mode = serializeStringMap(value, data, output, mode);
             case TypeInformation.MAP(INT, value)                                                : mode = serializeIntMap(value, data, output, mode);

@@ -31,7 +31,7 @@ class BytesUnserialzer
             case TypeInformation.BYTES                                                                 : unserializeBytes(input);
             case TypeInformation.STRING                                                                : unserializeString(input); 
             case TypeInformation.ENUM(name, _enum, keys, constractors, nameToAlias, aliasToName)       : unserializeEnum(name, _enum, keys, constractors, input);
-            case TypeInformation.CLASS(name, _class, fields, fieldNames, nameToAlias, serializeToArray): unserializeClassInstance(name, _class, fields, fieldNames, input);
+            case TypeInformation.CLASS(name, _class, fields, fieldNames, nameToAlias, serializeToArray, _): unserializeClassInstance(name, _class, fields, fieldNames, input);
             case TypeInformation.ANONYMOUS(fields, fieldNames, nameToAlias, serializeToArray)          : unserializeAnonymous(fields, fieldNames, input);
             case TypeInformation.MAP(STRING, value)                                                    : unserializeStringMap(value, input);
             case TypeInformation.MAP(INT, value)                                                       : unserializeIntMap(value, input);

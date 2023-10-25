@@ -1,5 +1,6 @@
 package;
 import cases.BytesPackerTestCase;
+import cases.CloneTestCase;
 import cases.JsonPackerTestCase;
 import cases.TypePackerTestCase;
 import nanotest.NanoTestRunner;
@@ -19,6 +20,7 @@ class TestMain
         runner.add(new JsonPackerTestCase(false, false));
         runner.add(new BytesPackerTestCase(true));
         runner.add(new BytesPackerTestCase(false));
+        runner.add(new CloneTestCase());
 
 #if (js || cpp || flash)
         //runner.add(new cases.YamlPackerTestCase());

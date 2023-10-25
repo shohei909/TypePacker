@@ -64,7 +64,7 @@ class DataConcreter {
                 (concreteBytes(data) : Dynamic);
             case TypeInformation.ENUM(name, _enum, keys, constractors, nameToAlias, aliasToName):
                 (concreteEnum(name, _enum, keys, constractors, data, aliasToName) : Dynamic);
-            case TypeInformation.CLASS(name, _class, fieldTypes, fieldNames, nameToAlias, serializeToArray) :
+            case TypeInformation.CLASS(name, _class, fieldTypes, fieldNames, nameToAlias, serializeToArray, _) :
                 (concreteClass(name, _class, fieldTypes, fieldNames, data, nameToAlias, serializeToArray) : Dynamic);
             case TypeInformation.ANONYMOUS(fieldTypes, fieldNames, nameToAlias, serializeToArray) :
                 (concreteAnonymous(fieldTypes, fieldNames, data, nameToAlias, serializeToArray) : Dynamic);

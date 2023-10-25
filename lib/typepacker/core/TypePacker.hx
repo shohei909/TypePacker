@@ -224,7 +224,21 @@ class TypePacker
                     }
                 }
                 fieldNames.reverse();
-                TypeInformation.CLASS(ref.toString(), null, map, fieldNames, aliasContext.nameToAlias, serializeToArray);
+				false;
+				var cloneField = TypeTools.findField(struct, "clone");
+				var hasClone = 
+					cloneField != null &&
+					cloneField.kind.match(FMethod(_)) &&
+					cloneField.isPublic;
+				
+                TypeInformation.CLASS(
+					ref.toString(), 
+					null, 
+					map, 
+					fieldNames, 
+					aliasContext.nameToAlias, 
+					serializeToArray,
+					hasClone);
 
             case TAnonymous(ref):
                 var struct = ref.get();

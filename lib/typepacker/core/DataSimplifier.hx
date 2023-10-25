@@ -57,7 +57,7 @@ class DataSimplifier {
                 (simplifyBytes(data) : Dynamic);
             case TypeInformation.ENUM(_, _, keys, constractors, nameToAlias, aliasToName):
                 (simplifyEnum(keys, constractors, data, nameToAlias) : Dynamic);
-            case TypeInformation.CLASS(_, _, fields, fieldNames, nameToAlias, serializeToArray) | 
+            case TypeInformation.CLASS(_, _, fields, fieldNames, nameToAlias, serializeToArray, _) | 
 			     TypeInformation.ANONYMOUS(fields, fieldNames, nameToAlias, serializeToArray) :
                 (simplifyClassInstance(fields, fieldNames, data, nameToAlias, serializeToArray) : Dynamic);
             case TypeInformation.MAP(STRING, value) :

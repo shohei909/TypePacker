@@ -17,7 +17,7 @@ class TypePackerTestCase extends BaseTestCase
 
     public function testBasic() {
         switch (TypePacker.toTypeInformation("SamplePair")) {
-            case TypeInformation.CLASS("cases.sample.SampleStringValue", _, types, names, nameToAlias, serializeToArray):
+            case TypeInformation.CLASS("cases.sample.SampleStringValue", _, types, names, nameToAlias, serializeToArray, _):
                 assertMapEquals(
                     [
                         "key" => "String",
@@ -38,7 +38,7 @@ class TypePackerTestCase extends BaseTestCase
         }
 
         switch (TypePacker.toTypeInformation("SampleClass")) {
-            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names, nameToAlias, serializeToArray):
+            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names, nameToAlias, serializeToArray, _):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
@@ -65,7 +65,7 @@ class TypePackerTestCase extends BaseTestCase
                 fail("must be CLASS");
         };
         switch (TypePacker.toTypeInformation("SampleClassSerializeToArray")) {
-            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names, nameToAlias, serializeToArray):
+            case TypeInformation.CLASS("cases.sample.SampleClass", _, types, names, nameToAlias, serializeToArray, _):
                 assertEquals(true, serializeToArray);
 				
             default:
@@ -84,7 +84,7 @@ class TypePackerTestCase extends BaseTestCase
                 fail("must be ENUM TYPE:" + type);
         }
         switch (TypePacker.resolveType("cases.sample._Sample.SamplePrivateClass")) {
-            case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names, nameToAlias, serializeToArray):
+            case TypeInformation.CLASS("cases.sample._Sample.SamplePrivateClass", _, types, names, nameToAlias, serializeToArray, _):
                 assertMapEquals(
                     [
                         "c" => "cases.sample._Sample.SamplePrivateClass",
