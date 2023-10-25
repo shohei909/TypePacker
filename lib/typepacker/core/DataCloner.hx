@@ -9,11 +9,9 @@ import haxe.crypto.Base64;
 import haxe.crypto.BaseCode;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
-import haxe.macro.Expr;
 import typepacker.core.TypeInformation.CollectionType;
 import typepacker.core.TypeInformation.MapKeyType;
 import typepacker.core.TypeInformation.PrimitiveType;
-
 
 class DataCloner
 {
