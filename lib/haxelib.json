@@ -3,9 +3,9 @@
   "url" : "https://github.com/shohei909/typepacker",
   "license": "MIT",
   "tags": ["flash", "cpp", "js", "neko", "cs", "json", "hl", "clone", "equal", "serialization"],
-  "description": "JSON serialization / Binary serialization / Deep clone / Deep equal",
+  "description": "JSON serialization / Binary serialization / Deep clone / Structural equality",
   "version": "2.0.0",
-  "releasenote": "Deep clone / Deep equal",
+  "releasenote": "Deep clone / Structural equality",
   "contributors": ["shohei909"],
   "dependencies": {}
 }

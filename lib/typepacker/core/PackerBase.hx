@@ -40,7 +40,6 @@ class PackerBase {
         return macro $self.printWithInfo($info, ($data : $complexType));
     }
 
-
     macro public function parse(self:Expr, type:String, data:Expr) {
         var info = TypePacker.toTypeInformation(type);
         return macro $self.parseWithInfo($info, $data);

@@ -1,8 +1,9 @@
 package cases.sample;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
+import typepacker.core.Clone;
 
-class SampleClass
+class SampleClass implements Clone
 {
     public var c:SamplePrivateClass;
     public var e:SampleEnum;

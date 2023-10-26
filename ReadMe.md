@@ -3,7 +3,7 @@
 TypePacker provides the following functionality by using type information collected at compile time.
 
 * Deep Clone 
-* Deep Equal (Structural Equality)
+* Structural Equality (Deep Equal)
 * Serialize / Unserialize
 
 
@@ -94,7 +94,7 @@ var arrayData = typepacker.bytes.BytesPack.parse("Array<Int>", bytearray);
 ```
 
 This serialization method is suitable for data communications.
-It has a smaller file size than Json, but compatibility between versions is difficult.
+It has a smaller data size than Json, but compatibility between versions is more difficult.
 
 Please refer to [the test cases](test/cases/sample/BytesPackerTestCase.hx) for more detailed usage.
 

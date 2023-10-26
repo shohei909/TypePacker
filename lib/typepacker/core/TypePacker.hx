@@ -41,15 +41,25 @@ class TypePacker
 
     public static function complexTypeToTypeInformation(complexType:ComplexType):Expr {
         var pos = Context.currentPos();
-        var name = registerType(ComplexTypeTools.toType(complexType));
+		var name = registerType(ComplexTypeTools.toType(complexType));
         var infoType = macro: typepacker.core.TypeInformation<$complexType>;
         return macro (typepacker.core.TypePacker.resolveType($v{name}) : $infoType);
     }
 
     public static function stringToComplexType(str:String) {
-        var expr = Context.parse("(_:" + str + ")", Context.currentPos());
+		var expr = Context.parse("(_:" + str + ")", Context.currentPos());
         return switch (expr) {
             case { expr : EParenthesis({expr : ECheckType(_, type)}) }:
+				switch (type)
+				{
+					case TPath(path):
+						if (path.name != null && StringTools.startsWith(path.name, "_"))
+						{
+							path.name = path.name.substr(1);
+						}
+						
+					case _:
+				}
                 type;
             case _:
                 throw "invalid complex type";

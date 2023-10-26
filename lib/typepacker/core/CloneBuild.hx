@@ -34,7 +34,7 @@ class CloneBuild
 					access: access,
 					kind: FieldType.FFun({
 						expr: macro {
-							return new typepacker.core.DataCloner(typepacker.core.DataCloner.defaultSetting).execute(
+							@:pos(pos) return new typepacker.core.DataCloner(typepacker.core.DataCloner.defaultSetting).execute(
 								typepacker.core.TypePacker.toTypeInformation($v{typeName}),
 								this,
 								true
