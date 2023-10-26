@@ -71,3 +71,12 @@ class SampleClone2 extends SampleClone
 		this.x = x;
 	}
 }
+
+class SampleCloneOverride extends SampleClone2
+{	
+	public override function clone():SampleCloneOverride
+	{
+		var result = new SampleCloneOverride(a, b, x);
+		return result;
+	}
+}
