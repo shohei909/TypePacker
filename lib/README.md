@@ -40,7 +40,7 @@ class Main
 }
 ```
 
-Please refer to [the test cases](test/cases/sample/CloneTestCase.hx) for more detailed usage.
+Please refer to [the test cases](test/cases/CloneTestCase.hx) for more detailed usage.
 
 
 ## Deep Equal
@@ -83,7 +83,7 @@ var arrayData = typepacker.json.Json.parse("Array<Int>", jsonString);
 
 This serialization method is suited for data persistence.
 
-Please refer to [the test cases](test/cases/sample/JsonPackerTestCase.hx) for more detailed usage.
+Please refer to [the test cases](test/cases/JsonPackerTestCase.hx) for more detailed usage.
 
 
 ### TypePacker binary format
@@ -96,14 +96,14 @@ var arrayData = typepacker.bytes.BytesPack.parse("Array<Int>", bytearray);
 This serialization method is suitable for data communications.
 It has a smaller data size than Json, but compatibility between versions is more difficult.
 
-Please refer to [the test cases](test/cases/sample/BytesPackerTestCase.hx) for more detailed usage.
+Please refer to [the test cases](test/cases/BytesPackerTestCase.hx) for more detailed usage.
 
 
 ### Other format
 
 Serialization is also possible for any format compatible with JSON. For example, Message Pack / Yaml.
 
-Please refer to [the Yaml test case](test/cases/sample/YamlPackerTestCase.hx).
+Please refer to [the Yaml test case](test/cases/YamlPackerTestCase.hx).
 
 
 # Supported type
