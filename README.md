@@ -6,7 +6,6 @@ TypePacker provides the following functionality by using type information collec
 * Structural Equality (Deep Equal)
 * Serialize / Unserialize
 
-
 ## Deep Clone
 
 ```hx
@@ -99,9 +98,9 @@ It has a smaller data size than Json, but compatibility between versions is more
 Please refer to [the test cases](test/cases/sample/BytesPackerTestCase.hx) for more detailed usage.
 
 
-### Other format
+### Other formats
 
-Serialization is also possible for any format compatible with JSON. For example, Message Pack / Yaml.
+Serialization is also possible for any formats compatible with JSON. For example, Message Pack / Yaml.
 
 Please refer to [the Yaml test case](test/cases/sample/YamlPackerTestCase.hx).
 
@@ -113,12 +112,12 @@ Deep Clone / Deep Equal / Serialize / Unserialize is available for the following
 * Primitive Type(Int / Float / Bool)
 * String
 * Enum
+* Anonymous Type
 * Abstract
 * Typedef
-* Type (Class\<Dynamic\> / Enum\<Dynamic\>)
 * Collection(Array\<T\> / haxe.ds.List\<T\> / haxe.ds.Vector\<T\>)
 * haxe.io.Bytes
 * StringMap / IntMap
-* Anonymous Type
 * haxe.DynamicAccess\<T\>
 * Null\<T\>
+* Type (Class\<Dynamic\> / Enum\<Dynamic\>)
