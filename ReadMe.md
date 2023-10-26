@@ -115,10 +115,10 @@ Deep Clone / Deep Equal / Serialize / Unserialize is available for the following
 * Enum
 * Abstract
 * Typedef
-* Type (Class<Dynamic> / Enum<Dynamic>)
-* Collection
-* Bytes
+* Type (Class\<Dynamic\> / Enum\<Dynamic\>)
+* Collection(Array\<T\> / haxe.ds.List\<T\> / haxe.ds.Vector\<T\>)
+* haxe.io.Bytes
 * StringMap / IntMap
 * Anonymous Type
-* DynamicAccess<T>
-* Null<T>
+* haxe.DynamicAccess\<T\>
+* Null\<T\>
