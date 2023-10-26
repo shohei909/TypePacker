@@ -2,10 +2,10 @@
   "name": "typepacker",
   "url" : "https://github.com/shohei909/typepacker",
   "license": "MIT",
-  "tags": ["flash", "cpp", "js", "neko", "cs", "json", "hl"],
-  "description": "typed json serializer",
-  "version": "1.3.2",
-  "releasenote": "improve property support",
+  "tags": ["flash", "cpp", "js", "neko", "cs", "json", "hl", "clone", ""],
+  "description": "JSON serialization / Binary serialization / Deep clone / Deep equal",
+  "version": "2.0.0",
+  "releasenote": "Deep clone / Deep equal",
   "contributors": ["shohei909"],
   "dependencies": {}
 }

@@ -29,10 +29,12 @@ class DataCloner
 		callsFromCloneFunc:Bool = false):T
 	{
         return switch(typeInfo) {
-            case TypeInformation.PRIMITIVE(_): data;
-            case TypeInformation.STRING      : data;
-            case TypeInformation.CLASS_TYPE  : data;
-            case TypeInformation.ENUM_TYPE   : data;
+            case 
+				TypeInformation.PRIMITIVE(_) |
+				TypeInformation.STRING       |
+				TypeInformation.CLASS_TYPE   |
+				TypeInformation.ENUM_TYPE   : 
+				data;
 				
             case TypeInformation.BYTES:
                 (cloneBytes(data) : Dynamic);
@@ -40,7 +42,7 @@ class DataCloner
             case TypeInformation.ENUM(_, _enum, keys, constractors, _, _):
                 (cloneEnum(_enum, keys, constractors, data) : Dynamic);
 				
-            case TypeInformation.CLASS(_, _class, fields, fieldNames, _, _, hasClone):
+            case TypeInformation.CLASS(_, _class, fields, fieldNames, _, _, hasClone, _):
 				(cloneClass(_class, fields, fieldNames, data, hasClone, callsFromCloneFunc) : Dynamic);
 				
 			case TypeInformation.ANONYMOUS(fields, fieldNames, _, _):
@@ -120,19 +122,19 @@ class DataCloner
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be enum : actual " + data);
         }
 
-        var params:Array<Dynamic> = [];
+        var resultParams:Array<Dynamic> = [];
         var index:Int;
         index = Type.enumIndex(data);
 		
         var paramTypes = constractors[index];
         var params = Type.enumParameters(data);
         for (i in 0...paramTypes.length) {
-            params.push(execute(TypePacker.resolveType(paramTypes[i]), params[i]));
+            resultParams.push(execute(TypePacker.resolveType(paramTypes[i]), params[i]));
         }
         return Type.createEnumIndex(
 			_enum,
 			index,
-			params
+			resultParams
 		);
     }
 
@@ -150,7 +152,7 @@ class DataCloner
 			!callsFromCloneFunc &&
 			setting.usesExistingImpl)
 		{
-			Reflect.callMethod(data, Reflect.field(data, "clone"), []);
+			return Reflect.callMethod(data, Reflect.field(data, "clone"), []);
 		}
 		
 		var result = Type.createEmptyInstance(_class);
