@@ -9,9 +9,12 @@ TypePacker provides the following functionality by using type information collec
 
 ## Deep Clone
 
-TypePacker enables Deep Clone.
+```hx
+var cloneData = typepacker.core.TypeUtil.clone("Array<Int>", [0, 1, 2]);
+```
 
-Usage:
+The `typepacker.core.Clone` interface automatically implements the `clone` function.
+
 ```hx
 import typepacker.core.Clone;
 
@@ -37,14 +40,11 @@ class Main
 }
 ```
 
-Please refer to [the test cases](test/cases/sample/CloneTestCase.hx) for more detailed usage, including cloning of non-Class types.
+Please refer to [the test cases](test/cases/sample/CloneTestCase.hx) for more detailed usage.
 
 
 ## Deep Equal
 
-TypePacker enables Structural Equality checks.
-
-Usage:
 ```hx
 import typepacker.core.TypeUtil;
 
@@ -83,7 +83,7 @@ var arrayData = typepacker.json.Json.parse("Array<Int>", jsonString);
 
 This serialization method is suited for data persistence.
 
-Please refer to [the test cases](test/cases/sample/JsonPackerTestCase.hx) for more detailed usage, including cloning of non-Class types.
+Please refer to [the test cases](test/cases/sample/JsonPackerTestCase.hx) for more detailed usage.
 
 
 ### TypePacker binary format
@@ -96,7 +96,7 @@ var arrayData = typepacker.bytes.BytesPack.parse("Array<Int>", bytearray);
 This serialization method is suitable for data communications.
 It has a smaller file size than Json, but compatibility between versions is difficult.
 
-Please refer to [the test cases](test/cases/sample/BytesPackerTestCase.hx) for more detailed usage, including cloning of non-Class types.
+Please refer to [the test cases](test/cases/sample/BytesPackerTestCase.hx) for more detailed usage.
 
 
 ### Other format
