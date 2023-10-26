@@ -1,6 +1,6 @@
 # TypePacker
 
-TypePacker provides the following functionality by using type information collected at compile time.
+TypePacker provides the following functionality by using type information collected at compile time macro.
 
 * Deep Clone 
 * Structural Equality (Deep Equal)
@@ -99,9 +99,9 @@ It has a smaller data size than Json, but compatibility between versions is more
 Please refer to [the test cases](test/cases/BytesPackerTestCase.hx) for more detailed usage.
 
 
-### Other format
+### Other formats
 
-Serialization is also possible for any format compatible with JSON. For example, Message Pack / Yaml.
+Serialization is also possible for any formats compatible with JSON. For example, Message Pack / Yaml.
 
 Please refer to [the Yaml test case](test/cases/YamlPackerTestCase.hx).
 
@@ -111,14 +111,29 @@ Please refer to [the Yaml test case](test/cases/YamlPackerTestCase.hx).
 Deep Clone / Deep Equal / Serialize / Unserialize is available for the following types.
 
 * Primitive Type(Int / Float / Bool)
+* Collection(Array\<T\> / haxe.ds.List\<T\> / haxe.ds.Vector\<T\>)
 * String
 * Enum
+* Anonymous Type
 * Abstract
 * Typedef
-* Type (Class\<Dynamic\> / Enum\<Dynamic\>)
-* Collection(Array\<T\> / haxe.ds.List\<T\> / haxe.ds.Vector\<T\>)
 * haxe.io.Bytes
 * StringMap / IntMap
-* Anonymous Type
 * haxe.DynamicAccess\<T\>
 * Null\<T\>
+* Type (Class\<Dynamic\> / Enum\<Dynamic\>)
+
+
+## Unsupported
+
+* haxe.ds.EnumMap / haxe.ds.ObjectMap / haxe.ds.WeakMap
+* Function Type
+* etc...
+
+Recursive types are supported, but instances with circular references are not supported.
+
+
+# Metadata for fields
+
+* @:serializeAlias(alias)
+* @:noPack
