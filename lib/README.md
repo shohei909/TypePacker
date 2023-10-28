@@ -74,7 +74,7 @@ class Main
 ## Serialize / Unserialize
 
 
-### Json 
+### JSON 
 
 ```hx
 var jsonString = typepacker.json.Json.print("Array<Int>", [0, 1, 2]);
@@ -86,7 +86,7 @@ This serialization method is suited for data persistence.
 Please refer to [the test cases](test/cases/JsonPackerTestCase.hx) for more detailed usage.
 
 
-### TypePacker binary format
+### TypePacker Binary Format
 
 ```hx
 var bytearray = typepacker.bytes.BytesPack.print("Array<Int>", [0, 1, 2]);
@@ -135,5 +135,6 @@ Recursive types are supported, but instances with circular references are not su
 
 # Metadata for fields
 
-* @:serializeAlias(alias)
-* @:noPack
+* `@:serializeAlias("alias")`
+* `@:serializeToArray`
+* `@:noPack`

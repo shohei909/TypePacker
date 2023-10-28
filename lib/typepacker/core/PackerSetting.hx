@@ -8,6 +8,8 @@ class PackerSetting {
 	public var intAsFloat = false;
     public var useEnumIndex = false;
     public var bytesToBase64 = true;
+	public var omitsNull = true;
+	
     public var initializesWithEmptyArray         = false;
     public var initializesWithEmptyMap           = false;
     public var initializesWithEmptyList          = false;

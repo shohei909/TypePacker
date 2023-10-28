@@ -199,7 +199,10 @@ class DataSimplifier {
 					key = nameToAlias[key];
 				}
 				var value = simplify(type, f);
-				Reflect.setField(result, key, value);
+				if (!setting.omitsNull || value != null)
+				{
+					Reflect.setField(result, key, value);
+				}
 			}
 			return result;
 		}
