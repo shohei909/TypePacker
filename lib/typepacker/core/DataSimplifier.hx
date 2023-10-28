@@ -158,12 +158,26 @@ class DataSimplifier {
         }
         var paramTypes = constractors[index];
         var params = Type.enumParameters(data);
-
-        for (i in 0...paramTypes.length) {
+		for (i in 0...paramTypes.length) 
+		{
             var type = TypePacker.resolveType(paramTypes[i]);
             result.push(simplify(type, params[i]));
         }
-
+		if (setting.omitsNull)
+		{
+			var len = result.length;
+			for (i in 0...len)
+			{
+				if (result[len - i - 1] == null)
+				{
+					result.pop();
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
         return result;
     }
 

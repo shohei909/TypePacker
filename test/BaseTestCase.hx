@@ -93,6 +93,7 @@ class BaseTestCase extends NanoTestCase
 		assertDynamicEquals({ i : -12 }, packer.parse("IntDataAlias", packer.print("IntDataAlias", { i : -12 })));
         assertNotEquals(null, packer.parse("IntData", packer.print("IntData", new SampleClass())));
 		assertEquals(SampleEnum.NONE, packer.parse("SampleEnum", packer.print("SampleAbstract", new SampleAbstract(SampleEnum.NONE))));
+		assertEquals(SampleEnum.LINK(null, null), packer.parse("SampleEnum", packer.print("SampleEnum", SampleEnum.LINK(null, null))));
     }
 }
 
