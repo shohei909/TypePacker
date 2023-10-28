@@ -33,14 +33,28 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals("{\"i\":-12}", Json.print("IntData", { i : -12 } ));
         assertEquals("{\"i\":50}", Json.print("IntData", new SampleClass()));
         assertEquals("{\"x\":50}", Json.print("IntDataAlias", new SampleClass()));
-        assertEquals("[\"a\"]", Json.print("SampleAliasEnum", SampleAliasEnum.AAA));
-        assertEquals("[\"BBB\"]", Json.print("SampleAliasEnum", SampleAliasEnum.BBB));
-		
-        if (Json.defaultPacker.setting.useEnumIndex) {
-            assertEquals("[1]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
-        } else {
-            assertEquals("[\"NONE\"]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
-        }
+		if (Json.defaultPacker.setting.forcesEnumToArray) 
+		{
+			assertEquals("[\"a\"]", Json.print("SampleAliasEnum", SampleAliasEnum.AAA));
+			assertEquals("[\"BBB\"]", Json.print("SampleAliasEnum", SampleAliasEnum.BBB));
+			
+			if (Json.defaultPacker.setting.useEnumIndex) {
+				assertEquals("[1]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
+			} else {
+				assertEquals("[\"NONE\"]", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
+			}
+		}
+		else
+		{
+			assertEquals("\"a\"", Json.print("SampleAliasEnum", SampleAliasEnum.AAA));
+			assertEquals("\"BBB\"", Json.print("SampleAliasEnum", SampleAliasEnum.BBB));
+			
+			if (Json.defaultPacker.setting.useEnumIndex) {
+				assertEquals("1", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
+			} else {
+				assertEquals("\"NONE\"", Json.print("cases.sample.Sample.SampleAbstract", new SampleAbstract(SampleEnum.NONE)));
+			}
+		}
         assertEquals("\"cases.sample.SampleClass\"", Json.print("Class<SampleClass>", SampleClass));
         assertEquals("\"cases.sample.SampleEnum\"", Json.print("Enum<SampleEnum>", SampleEnum));
 		assertEquals("{\"a\":[\"x\"]}", Json.print("haxe.DynamicAccess<Array<String>>", {a:["x"]}));
@@ -53,7 +67,8 @@ class JsonPackerTestCase extends BaseTestCase
         assertEquals("\"", Json.parse("String", "\"\\\"\""));
         assertEquals(null, Json.parse("Empty", "null"));
 		assertEquals(SampleAliasEnum.AAA, Json.parse("SampleAliasEnum", "[\"a\"]"));
-		assertEquals(SampleAliasEnum.AAA, Json.parse("SampleAliasEnum", "[\"AAA\"]"));
+		assertEquals(SampleAliasEnum.AAA, Json.parse("SampleAliasEnum", "\"AAA\""));
+		assertEquals(SampleAliasEnum.AAA, Json.parse("SampleAliasEnum", "0"));
         assertEquals(SampleAliasEnum.BBB, Json.parse("SampleAliasEnum", "[\"BBB\"]"));
 		
 		

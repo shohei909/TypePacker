@@ -9,6 +9,7 @@ class PackerSetting {
     public var useEnumIndex = false;
     public var bytesToBase64 = true;
 	public var omitsNull = true;
+	public var forcesEnumToArray = false;
 	
     public var initializesWithEmptyArray         = false;
     public var initializesWithEmptyMap           = false;

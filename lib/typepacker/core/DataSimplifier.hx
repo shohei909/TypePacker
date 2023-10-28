@@ -133,52 +133,69 @@ class DataSimplifier {
         return result;
     }
 
-    private function simplifyEnum(keys:Map<String, Int>, constractors:Map<Int,Array<String>>, data:Dynamic, nameToAlias:Null<Map<String, String>>) {
+    private function simplifyEnum(keys:Map<String, Int>, constractors:Map<Int,Array<String>>, data:Dynamic, nameToAlias:Null<Map<String, String>>):Dynamic
+	{
         if (data == null) return null;
         if (setting.validates && !Reflect.isEnumValue(data)) {
             throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be enum : actual " + data);
         }
 
-        var result:Array<Dynamic> = [];
-        var index:Int;
-        if (setting.useEnumIndex)
-        {
-            index = Type.enumIndex(data);
-            result.push(index);
-        }
-        else
-        {
-            var c = Type.enumConstructor(data);
+		var result:Array<Dynamic> = null;
+		var header:Dynamic;
+		inline function add(data:Dynamic):Void
+		{
+			if (result == null) { result = [header]; }
+			result.push(data);
+		}
+		
+		var index:Int;
+		if (setting.useEnumIndex)
+		{
+			index = Type.enumIndex(data);
+			header = index;
+		}
+		else
+		{
+			var c = Type.enumConstructor(data);
 			index = keys[c];
 			if (nameToAlias != null && nameToAlias.exists(c)) 
 			{
 				c = nameToAlias[c];
 			}
-            result.push(c);
-        }
-        var paramTypes = constractors[index];
-        var params = Type.enumParameters(data);
+			header = c;
+		}
+		if (setting.forcesEnumToArray) { result = [header]; }
+		
+		var paramTypes = constractors[index];
+		var params = Type.enumParameters(data);
+		var nullCount = 0;
 		for (i in 0...paramTypes.length) 
 		{
-            var type = TypePacker.resolveType(paramTypes[i]);
-            result.push(simplify(type, params[i]));
-        }
-		if (setting.omitsNull)
-		{
-			var len = result.length;
-			for (i in 0...len)
+			var type = TypePacker.resolveType(paramTypes[i]);
+			var data = simplify(type, params[i]);
+			if (data == null) 
 			{
-				if (result[len - i - 1] == null)
+				nullCount += 1;
+			}
+			else
+			{
+				for (_ in 0...nullCount)
 				{
-					result.pop();
+					add(null);
 				}
-				else
-				{
-					break;
-				}
+				nullCount = 0;
+				add(data);
 			}
 		}
-        return result;
+		if (!setting.omitsNull)
+		{
+			for (_ in 0...nullCount)
+			{
+				add(null);
+			}
+			nullCount = 0;
+		}
+        return if (result == null) { header; } else { result; }
     }
 
     private function simplifyClassInstance(fields:Map<String,String>, fieldNames:Array<String>, data:Dynamic, nameToAlias:Null<Map<String, String>>, serializeToArray:Bool):Dynamic {

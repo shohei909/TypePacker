@@ -166,39 +166,58 @@ class DataConcreter {
     private function concreteEnum(name:String, _enum:Enum<Dynamic>, keys:Map<String, Int>, constractors:Map<Int, Array<String>>, data:Dynamic, aliasToName:Null<Map<String, String>>):EnumValue {
         if (data == null) return null;
         if (_enum == null) _enum = Type.resolveEnum(name);
-        if (!Std.isOfType(data, Array)) {
-            throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be array");
-        }
 
-        var array:Array<Dynamic> = data;
-        var index:Int;
-        if (setting.useEnumIndex)
-        {
-            if (!Std.isOfType(array[0], Int)) {
-                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be int");
-            }
-            index = array[0];
-        }
-        else
-        {
-            if (!Std.isOfType(array[0], String)) {
-                throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be string");
-            }
-            var c:String = array[0];
+		var index:Int;
+		var array:Array<Dynamic> = null;
+		var value:Dynamic;
+		if (Std.isOfType(data, Array))
+		{
+			array = data;
+			value = array[0];
+		}
+		else
+		{
+			value = data;
+		}
+		if (Std.isOfType(value, Int)) 
+		{
+			index = value;
+		}
+		else if (Std.isOfType(value, String))
+		{
+			var c:String = value;
 			if (aliasToName != null && aliasToName.exists(c))
 			{
 				c = aliasToName[c];
 			}
 			index = keys[c];
-        }
-        var paramTypes = constractors[index];
-        var params = [];
-
-        for (i in 0...paramTypes.length) {
-            var type = TypePacker.resolveType(paramTypes[i]);
-            params.push(concrete(type, array[i + 1]));
-        }
-
+		}
+		else
+		{
+			throw new TypePackerError(TypePackerError.FAIL_TO_READ, "must be array, int or string");
+		}
+		var paramTypes = constractors[index];
+		var params = null;
+		if (paramTypes.length > 0)
+		{
+			params = [];
+			if (array == null)
+			{
+				for (i in 0...paramTypes.length) 
+				{
+					var type = TypePacker.resolveType(paramTypes[i]);
+					params.push(concrete(type, null));
+				}
+			}
+			else
+			{
+				for (i in 0...paramTypes.length) 
+				{
+					var type = TypePacker.resolveType(paramTypes[i]);
+					params.push(concrete(type, array[i + 1]));
+				}
+			}
+		}
         return Type.createEnumIndex(_enum, index, params);
     }
 
