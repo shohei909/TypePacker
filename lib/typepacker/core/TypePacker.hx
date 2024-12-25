@@ -99,7 +99,11 @@ class TypePacker
         {
             TypeTools.map(type, applyTypeParams.bind(paramsMap));
         }
-        
+        type = switch (type)
+        {
+            case MacroType.TLazy(func): func();
+            case _: type;
+        }
         var name = getTypeName(type);
         if (paramsMap.exists(name)) {
             return getTypeName(paramsMap[name]);
