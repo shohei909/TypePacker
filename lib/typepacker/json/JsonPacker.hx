@@ -5,7 +5,7 @@ import typepacker.core.PackerSetting;
 class JsonPacker extends PackerBase {
     public function new(basePrint:Dynamic->String = null, baseParse:String->Dynamic = null) {
         if (basePrint == null) {
-            basePrint = haxe.Json.stringify.bind(_);
+            basePrint = jsonStringfy;
         }
         if (baseParse == null) {
             baseParse = haxe.Json.parse;
@@ -13,5 +13,9 @@ class JsonPacker extends PackerBase {
 
         var setting = new PackerSetting();
         super(basePrint, baseParse, setting);
+    }
+    
+    private static function jsonStringfy(data:Dynamic):String {
+        return haxe.Json.stringify(data);
     }
 }
