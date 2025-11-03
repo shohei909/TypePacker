@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": ["flash", "cpp", "js", "neko", "cs", "json", "hl", "clone", "equal", "serialization", "macro"],
   "description": "JSON serialization / Binary serialization / Deep clone / Structural equality",
-  "version": "2.0.1",
-  "releasenote": "fix for TLazy",
+  "version": "2.0.2",
+  "releasenote": "fix for haxe 5.0.0-preview.1",
   "contributors": ["shohei909"],
   "dependencies": {}
 }
