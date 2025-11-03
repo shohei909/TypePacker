@@ -33,4 +33,19 @@ class TypeUtil
 			$b
 		);
 	}
+
+	/**
+	   Compare
+	**/
+	public static macro function compare(typePath:String, a:Expr, b:Expr)
+	{
+		var info = TypePacker.toTypeInformation(typePath);
+        return macro new typepacker.core.DataComparer(
+			typepacker.core.DataComparer.defaultSetting
+		).compare(
+			$info,
+			$a,
+			$b
+		);
+	}
 }

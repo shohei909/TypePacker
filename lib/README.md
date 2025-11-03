@@ -3,7 +3,7 @@
 TypePacker provides the following functionality by using type information collected at compile time macro.
 
 * Deep Clone 
-* Structural Equality (Deep Equal)
+* Structural Equality (Deep Equal) / Compare
 * Serialize / Unserialize
 
 

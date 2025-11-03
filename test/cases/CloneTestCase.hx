@@ -39,6 +39,9 @@ class CloneTestCase extends BaseTestCase
 		assertTrue (TypeUtil.isSame("SampleClone" , s2a, s2b));
 		assertFalse(TypeUtil.isSame("SampleClone2", s2a, s2b));
 		
+		assertEquals(0, TypeUtil.compare("SampleClone" , s2a, s2b));
+		assertEquals(Reflect.compare(s2a.x.a, s2b.x.a), TypeUtil.compare("SampleClone2", s2a, s2b));
+
 		var c = new SampleClass();
 		var ea = SampleEnum.LINK(SampleEnum.NONE, c);
 		var eb = TypeUtil.clone("cases.sample.Sample.SampleEnum", ea);

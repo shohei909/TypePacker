@@ -3,9 +3,9 @@
   "url" : "https://github.com/shohei909/typepacker",
   "license": "MIT",
   "tags": ["flash", "cpp", "js", "neko", "cs", "json", "hl", "clone", "equal", "serialization", "macro"],
-  "description": "JSON serialization / Binary serialization / Deep clone / Structural equality",
-  "version": "2.0.2",
-  "releasenote": "fix for haxe 5.0.0-preview.1",
+  "description": "JSON serialization / Binary serialization / Deep clone / Structural equality / Compare",
+  "version": "2.1.0",
+  "releasenote": "add TypeUtil.compare",
   "contributors": ["shohei909"],
   "dependencies": {}
 }

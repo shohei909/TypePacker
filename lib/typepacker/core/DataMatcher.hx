@@ -30,31 +30,31 @@ class DataMatcher
 				false;
 				
             case TypeInformation.BYTES:
-                (isSameBytes(a, b) : Dynamic);
+                isSameBytes(a, b);
 				
             case TypeInformation.ENUM(_, _enum, keys, constractors, _, _):
-                (isSameEnum(_enum, keys, constractors, a, b) : Dynamic);
+                isSameEnum(_enum, keys, constractors, a, b);
 				
-            case TypeInformation.CLASS(_, _, fields, fieldNames, _, _, _, hasIsSame):
-				(isSameClass(fields, fieldNames, a, b, hasIsSame, callsFromIsSameFunc) : Dynamic);
+            case TypeInformation.CLASS(_, _, fields, fieldNames, _, _, _, hasIsSame, _):
+				isSameClass(fields, fieldNames, a, b, hasIsSame, callsFromIsSameFunc);
 				
 			case TypeInformation.ANONYMOUS(fields, fieldNames, _, _):
-                (isSameAnonymus(fields, fieldNames, a, b) : Dynamic);
+                isSameAnonymus(fields, fieldNames, a, b);
 				
             case TypeInformation.MAP(STRING, value) :
-                (isSameStringMap(value, (a:Dynamic), (b:Dynamic)) : Dynamic);
+                isSameStringMap(value, (a:Dynamic), (b:Dynamic));
 				
             case TypeInformation.MAP(INT, value) :
-                (isSameIntMap(value, (a:Dynamic), (b:Dynamic)) : Dynamic);
+                isSameIntMap(value, (a:Dynamic), (b:Dynamic));
 				
             case TypeInformation.DYNAMIC_ACCESS(value) :
-                (isSameDynamicAccess(value, (a:Dynamic), (b:Dynamic)) : Dynamic);
+                isSameDynamicAccess(value, (a:Dynamic), (b:Dynamic));
 				
             case TypeInformation.COLLECTION(elementType, type) :
-                (isSameCollection(elementType, type, a, b) : Dynamic);
+                isSameCollection(elementType, type, a, b);
 				
             case TypeInformation.ABSTRACT(type) :
-                (isSameAbstract(type, a, b) : Dynamic);
+                isSameAbstract(type, a, b);
         }
 	}
 	

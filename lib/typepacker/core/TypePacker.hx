@@ -245,12 +245,18 @@ class TypePacker
 					cloneField.kind.match(FMethod(_)) &&
 					cloneField.isPublic;
 				
-				var IsSameField = TypeTools.findField(struct, "isSame");
+				var isSameField = TypeTools.findField(struct, "isSame");
 				var hasIsSame = 
-					IsSameField != null &&
-					IsSameField.kind.match(FMethod(_)) &&
-					IsSameField.isPublic;
-					
+					isSameField != null &&
+					isSameField.kind.match(FMethod(_)) &&
+					isSameField.isPublic;
+
+				var compareField = TypeTools.findField(struct, "compare");
+				var hasCompare = 
+					compareField != null &&
+					compareField.kind.match(FMethod(_)) &&
+					compareField.isPublic;
+
                 TypeInformation.CLASS(
 					ref.toString(), 
 					null, 
@@ -259,7 +265,8 @@ class TypePacker
 					aliasContext.nameToAlias, 
 					serializeToArray,
 					hasClone,
-					hasIsSame);
+					hasIsSame,
+                    hasCompare);
 
             case TAnonymous(ref):
                 var struct = ref.get();
