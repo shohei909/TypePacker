@@ -1,7 +1,7 @@
 #1. compile
 -main TestMain
 -js bin/test.js
--lib nanotest
+-lib nanotest:1.1.3
 -lib yaml
 -cp lib
 -cp test
